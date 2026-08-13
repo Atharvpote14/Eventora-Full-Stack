@@ -4,23 +4,40 @@ const otpVerificationSchema = new mongoose.Schema(
   {
     email: {
       type: String,
-      required: [true, "Email is required"],
-      lowercase: true,
+      required: true,
       trim: true,
+      lowercase: true,
+      index: true,
     },
-    otpHash: { type: String, required: [true, "OTP hash is required"] },
+    otpHash: {
+      type: String,
+      required: true,
+    },
     purpose: {
       type: String,
+      required: true,
       enum: ["registration", "forgot-password"],
-      required: [true, "Purpose is required"],
     },
-    expiresAt: { type: Date, required: [true, "Expiry is required"] },
-    attempts: { type: Number, default: 0, min: 0 },
+    expiresAt: {
+      type: Date,
+      required: true,
+    },
+    attempts: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
 
-otpVerificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-otpVerificationSchema.index({ email: 1, purpose: 1 });
+otpVerificationSchema.index(
+  { expiresAt: 1 },
+  { expireAfterSeconds: 0 }
+);
 
-module.exports = mongoose.model("OtpVerification", otpVerificationSchema);
+const OtpVerification = mongoose.model(
+  "OtpVerification",
+  otpVerificationSchema
+);
+
+module.exports = OtpVerification;

@@ -7,6 +7,13 @@ const {
   setAuthCookie,
   clearAuthCookie,
 } = require("../services/authService");
+const { createOtp, verifyOtp } = require("../services/otpService");
+const { sendOtpEmail } = require("../services/emailService");
+
+const PURPOSE = {
+  REGISTRATION: "registration",
+  FORGOT_PASSWORD: "forgot-password",
+};
 
 const sanitizeUser = (user) => ({
   _id: user._id,
@@ -36,6 +43,18 @@ const register = asyncHandler(async (req, res) => {
     phone: phone.trim(),
     city: city.trim(),
   });
+
+  try {
+    const otp = await createOtp(user.email, PURPOSE.REGISTRATION);
+    await sendOtpEmail({
+      email: user.email,
+      name: user.name,
+      otp,
+      purpose: PURPOSE.REGISTRATION,
+    });
+  } catch (error) {
+    console.warn("[email] OTP email failed:", error.message);
+  }
 
   return successResponse(
     res,
@@ -89,4 +108,111 @@ const getMe = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { register, login, logout, getMe };
+const verifyEmailOtp = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+
+  const user = await User.findOne({ email: email.toLowerCase().trim() });
+  if (!user) {
+    throw new ApiError(400, "Invalid verification code.");
+  }
+
+  if (user.isVerified) {
+    throw new ApiError(400, "Email is already verified.");
+  }
+
+  const result = await verifyOtp(user.email, otp, PURPOSE.REGISTRATION);
+  if (!result.ok) {
+    throw new ApiError(result.status, result.message);
+  }
+
+  user.isVerified = true;
+  await user.save();
+
+  return successResponse(res, { message: "Email verified successfully" });
+});
+
+const resendOtp = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email: email.toLowerCase().trim() });
+  if (!user) {
+    throw new ApiError(400, "No account found with this email.");
+  }
+
+  if (user.isVerified) {
+    throw new ApiError(400, "Email is already verified.");
+  }
+
+  const otp = await createOtp(user.email, PURPOSE.REGISTRATION);
+  try {
+    await sendOtpEmail({
+      email: user.email,
+      name: user.name,
+      otp,
+      purpose: PURPOSE.REGISTRATION,
+    });
+  } catch (error) {
+    console.warn("[email] Resend OTP email failed:", error.message);
+  }
+
+  return successResponse(res, {
+    message: "Verification code sent. Please check your email.",
+  });
+});
+
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+  if (user && user.isVerified) {
+    try {
+      const otp = await createOtp(user.email, PURPOSE.FORGOT_PASSWORD);
+      await sendOtpEmail({
+        email: user.email,
+        name: user.name,
+        otp,
+        purpose: PURPOSE.FORGOT_PASSWORD,
+      });
+    } catch (error) {
+      console.warn("[email] Password reset email failed:", error.message);
+    }
+  }
+
+  return successResponse(res, {
+    message:
+      "If an account exists with this email, a password reset code has been sent.",
+  });
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  const user = await User.findOne({ email: email.toLowerCase().trim() });
+  if (!user) {
+    throw new ApiError(400, "Invalid reset attempt.");
+  }
+
+  const result = await verifyOtp(user.email, otp, PURPOSE.FORGOT_PASSWORD);
+  if (!result.ok) {
+    throw new ApiError(result.status, result.message);
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  return successResponse(res, {
+    message: "Password reset successful. Please login.",
+  });
+});
+
+module.exports = {
+  register,
+  login,
+  logout,
+  getMe,
+  verifyEmailOtp,
+  resendOtp,
+  forgotPassword,
+  resetPassword,
+};

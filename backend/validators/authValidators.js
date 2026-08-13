@@ -32,4 +32,55 @@ const validateLogin = (body) => {
   return errors;
 };
 
-module.exports = { validateRegister, validateLogin };
+const validateOtp = (body) => {
+  const errors = {};
+  const email = body.email?.trim();
+  const otp = body.otp?.trim();
+
+  if (!email) errors.email = "Email is required";
+  else if (!EMAIL_REGEX.test(email)) errors.email = "Please provide a valid email";
+
+  if (!otp) errors.otp = "Verification code is required";
+  else if (!/^\d{6}$/.test(otp)) errors.otp = "Verification code must be 6 digits";
+
+  return errors;
+};
+
+const validateEmailOnly = (body) => {
+  const errors = {};
+  const email = body.email?.trim();
+
+  if (!email) errors.email = "Email is required";
+  else if (!EMAIL_REGEX.test(email)) errors.email = "Please provide a valid email";
+
+  return errors;
+};
+
+const validateResetPassword = (body) => {
+  const errors = {};
+  const email = body.email?.trim();
+  const otp = body.otp?.trim();
+  const newPassword = body.newPassword;
+
+  if (!email) errors.email = "Email is required";
+  else if (!EMAIL_REGEX.test(email)) errors.email = "Please provide a valid email";
+
+  if (!otp) errors.otp = "Verification code is required";
+  else if (!/^\d{6}$/.test(otp)) errors.otp = "Verification code must be 6 digits";
+
+  if (!newPassword) errors.newPassword = "New password is required";
+  else if (newPassword.length < 8)
+    errors.newPassword = "Password must be at least 8 characters";
+  else if (newPassword.length > 72)
+    errors.newPassword = "Password must be under 72 characters";
+
+  return errors;
+};
+
+module.exports = {
+  validateRegister,
+  validateLogin,
+  validateOtp,
+  validateEmailOnly,
+  validateResetPassword,
+};

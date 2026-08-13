@@ -4,24 +4,36 @@ const categorySchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Category name is required"],
-      unique: true,
+      required: true,
       trim: true,
-      maxlength: [60, "Category name must be under 60 characters"],
+      maxlength: 80,
     },
     slug: {
       type: String,
-      required: [true, "Category slug is required"],
-      unique: true,
-      lowercase: true,
+      required: true,
       trim: true,
-      maxlength: [80, "Category slug must be under 80 characters"],
+      lowercase: true,
     },
-    description: { type: String, default: "", trim: true },
-    image: { type: String, default: "" },
-    isActive: { type: Boolean, default: true },
+    description: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+    },
+    image: {
+      type: String,
+      default: "",
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Category", categorySchema);
+categorySchema.index({ slug: 1 }, { unique: true });
+categorySchema.index({ name: 1 }, { unique: true });
+
+const Category = mongoose.model("Category", categorySchema);
+
+module.exports = Category;

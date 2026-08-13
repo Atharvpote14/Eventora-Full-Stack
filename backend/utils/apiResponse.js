@@ -1,9 +1,10 @@
 const successResponse = (
   res,
-  { status = 200, message = "Operation successful", data = null } = {}
+  { status = 200, message = "Operation successful", data = null, pagination = null } = {}
 ) => {
   const body = { success: true, message };
   if (data !== null) body.data = data;
+  if (pagination !== null) body.pagination = pagination;
   return res.status(status).json(body);
 };
 

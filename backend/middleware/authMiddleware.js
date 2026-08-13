@@ -33,4 +33,20 @@ const authenticate = asyncHandler(async (req, res, next) => {
   next();
 });
 
-module.exports = { authenticate, COOKIE_NAME };
+const optionalAuthenticate = asyncHandler(async (req, res, next) => {
+  const token = req.cookies[COOKIE_NAME];
+
+  if (!token) return next();
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+    if (user && user.isActive) req.user = user;
+  } catch (error) {
+    // Invalid token — treat as anonymous
+  }
+
+  next();
+});
+
+module.exports = { authenticate, optionalAuthenticate, COOKIE_NAME };

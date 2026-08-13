@@ -9,6 +9,7 @@ const rateLimit = require("express-rate-limit");
 const mongoose = require("mongoose");
 
 const connectDB = require("./config/db");
+const apiRoutes = require("./routes");
 const {
   errorMiddleware,
   notFoundMiddleware,
@@ -70,6 +71,9 @@ app.get("/api/health", (req, res) => {
       mongoose.connection.readyState === 1 ? "connected" : "disconnected",
   });
 });
+
+// API routes
+app.use("/api", apiRoutes);
 
 // 404 handler
 app.use(notFoundMiddleware);

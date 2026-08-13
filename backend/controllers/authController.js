@@ -116,6 +116,14 @@ const verifyEmailOtp = asyncHandler(async (req, res) => {
   user.isVerified = true;
   await user.save();
 
+  const { notify } = require("../services/notificationService");
+  notify({
+    userId: user._id,
+    title: "Welcome to Eventora",
+    message: "Your email has been verified. Start discovering events and booking tickets!",
+    type: "account",
+  }).catch(() => {});
+
   return successResponse(res, { message: "Email verified successfully" });
 });
 

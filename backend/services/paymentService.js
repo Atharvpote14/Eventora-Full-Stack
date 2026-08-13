@@ -129,6 +129,15 @@ const initiateRefund = async ({ paymentId, requestedById, isAdmin }) => {
   booking.expiresAt = null;
   await booking.save();
 
+  const { notify } = require("./notificationService");
+  notify({
+    userId: booking.user,
+    title: "Refund Processed",
+    message: `A refund of ₹${booking.amount} for booking ${booking.bookingReference} has been processed.`,
+    type: "payment",
+    referenceId: booking._id,
+  }).catch(() => {});
+
   return {
     refundId: payment.refundId,
     refundAmount: booking.amount,

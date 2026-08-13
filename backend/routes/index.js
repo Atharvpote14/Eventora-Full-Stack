@@ -8,6 +8,7 @@ const bookingRoutes = require("./bookingRoutes");
 const organizerRoutes = require("./organizerRoutes");
 const paymentRoutes = require("./paymentRoutes");
 const ticketRoutes = require("./ticketRoutes");
+const notificationRoutes = require("./notificationRoutes");
 const adminRoutes = require("./adminRoutes");
 
 const router = express.Router();
@@ -20,6 +21,7 @@ router.use("/bookings", bookingRoutes);
 router.use("/organizer", organizerRoutes);
 router.use("/payments", paymentRoutes);
 router.use("/tickets", ticketRoutes);
+router.use("/notifications", notificationRoutes);
 router.use("/admin", adminRoutes);
 
 module.exports = router;

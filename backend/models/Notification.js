@@ -1,35 +1,45 @@
 const mongoose = require("mongoose");
 
+const NOTIFICATION_TYPES = ["booking", "payment", "event", "ticket", "account", "system"];
+
 const notificationSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "User is required"],
+      required: true,
     },
     title: {
       type: String,
-      required: [true, "Notification title is required"],
+      required: true,
       trim: true,
-      maxlength: [120, "Notification title must be under 120 characters"],
+      maxlength: 150,
     },
     message: {
       type: String,
-      required: [true, "Notification message is required"],
+      required: true,
       trim: true,
-      maxlength: [500, "Notification message must be under 500 characters"],
+      maxlength: 500,
     },
     type: {
       type: String,
-      enum: ["booking", "payment", "event", "ticket", "account", "system"],
-      default: "system",
+      enum: NOTIFICATION_TYPES,
+      required: true,
     },
-    isRead: { type: Boolean, default: false },
-    referenceId: { type: mongoose.Schema.Types.ObjectId },
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
+    referenceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
+    },
   },
   { timestamps: true }
 );
 
 notificationSchema.index({ user: 1, createdAt: -1 });
 
-module.exports = mongoose.model("Notification", notificationSchema);
+const Notification = mongoose.model("Notification", notificationSchema);
+
+module.exports = Notification;

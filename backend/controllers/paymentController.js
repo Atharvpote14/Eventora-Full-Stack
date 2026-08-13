@@ -15,6 +15,7 @@ const {
 const { expirePendingBookings } = require("../services/bookingService");
 const { generateTicketsForBooking } = require("../services/ticketService");
 const { sendBookingConfirmationEmail } = require("../services/emailService");
+const { notify } = require("../services/notificationService");
 
 const confirmBooking = async (booking, user) => {
   booking.paymentStatus = "paid";
@@ -23,6 +24,14 @@ const confirmBooking = async (booking, user) => {
   await booking.save();
 
   const tickets = await generateTicketsForBooking(booking);
+
+  notify({
+    userId: booking.user,
+    title: "Booking Confirmed",
+    message: `Your booking ${booking.bookingReference} for ${booking.quantity} ticket(s) has been confirmed.`,
+    type: "booking",
+    referenceId: booking._id,
+  }).catch(() => {});
 
   if (tickets.length > 0 && user) {
     const Event = mongoose.model("Event");
@@ -212,6 +221,14 @@ const reportFailure = asyncHandler(async (req, res) => {
   booking.paymentStatus = "failed";
   await booking.save();
 
+  notify({
+    userId: booking.user,
+    title: "Payment Failed",
+    message: `Payment for booking ${booking.bookingReference} failed. You can retry the payment.`,
+    type: "payment",
+    referenceId: booking._id,
+  }).catch(() => {});
+
   return successResponse(res, {
     message: "Payment failure recorded. You can retry payment.",
     data: { booking: { id: booking._id, status: booking.bookingStatus } },
@@ -323,6 +340,15 @@ const handleWebhook = asyncHandler(async (req, res) => {
         );
         const { releaseTickets } = require("../services/bookingService");
         await releaseTickets(booking.event, booking.ticketTypeId, booking.quantity);
+
+        const { notify } = require("../services/notificationService");
+        notify({
+          userId: booking.user,
+          title: "Refund Processed",
+          message: `A refund of ₹${booking.amount} for booking ${booking.bookingReference} has been processed.`,
+          type: "payment",
+          referenceId: booking._id,
+        }).catch(() => {});
       }
     }
   }

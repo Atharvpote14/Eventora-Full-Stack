@@ -191,6 +191,15 @@ const approveEvent = asyncHandler(async (req, res) => {
   event.status = "published";
   await event.save();
 
+  const { notify } = require("../services/notificationService");
+  notify({
+    userId: event.organizer,
+    title: "Event Approved",
+    message: `Your event "${event.title}" has been approved and is now published.`,
+    type: "event",
+    referenceId: event._id,
+  }).catch(() => {});
+
   return successResponse(res, {
     message: "Event approved and published.",
     data: { event },
@@ -207,6 +216,15 @@ const rejectEvent = asyncHandler(async (req, res) => {
 
   event.status = "rejected";
   await event.save();
+
+  const { notify } = require("../services/notificationService");
+  notify({
+    userId: event.organizer,
+    title: "Event Rejected",
+    message: `Your event "${event.title}" was not approved. Please review and resubmit.`,
+    type: "event",
+    referenceId: event._id,
+  }).catch(() => {});
 
   return successResponse(res, {
     message: "Event rejected.",

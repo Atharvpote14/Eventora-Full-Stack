@@ -216,7 +216,7 @@ const createEvent = asyncHandler(async (req, res) => {
     endTime: endTime || "",
     registrationDeadline: registrationDeadline ? new Date(registrationDeadline) : undefined,
     venue: venue.trim(),
-    address: address.trim(),
+    address: (address || "").trim(),
     city: city.trim(),
     ticketTypes,
     capacity,
@@ -374,6 +374,15 @@ const cancelEvent = asyncHandler(async (req, res) => {
     }
   }
   await Ticket.updateMany({ event: event._id }, { $set: { status: "cancelled" } });
+
+  const { notifyMany } = require("../services/notificationService");
+  await notifyMany({
+    userIds: bookings.map((b) => b.user),
+    title: "Event Cancelled",
+    message: `The event "${event.title}" has been cancelled. If you had a paid booking, a refund will be processed.`,
+    type: "event",
+    referenceId: event._id,
+  });
 
   return successResponse(res, {
     message: "Event cancelled successfully. Paid bookings have been refunded.",

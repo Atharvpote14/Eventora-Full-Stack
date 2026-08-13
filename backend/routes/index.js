@@ -3,11 +3,21 @@ const express = require("express");
 const authRoutes = require("./authRoutes");
 const userRoutes = require("./userRoutes");
 const eventRoutes = require("./eventRoutes");
+const categoryRoutes = require("./categoryRoutes");
+const bookingRoutes = require("./bookingRoutes");
+const organizerRoutes = require("./organizerRoutes");
+const paymentRoutes = require("./paymentRoutes");
+const adminRoutes = require("./adminRoutes");
 
 const router = express.Router();
 
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/events", eventRoutes);
+router.use("/categories", categoryRoutes);
+router.use("/bookings", bookingRoutes);
+router.use("/organizer", organizerRoutes);
+router.use("/payments", paymentRoutes);
+router.use("/admin", adminRoutes);
 
 module.exports = router;

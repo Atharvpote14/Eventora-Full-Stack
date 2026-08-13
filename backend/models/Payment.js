@@ -1,49 +1,65 @@
 const mongoose = require("mongoose");
 
+const PAYMENT_STATUSES = ["created", "pending", "successful", "failed", "refunded"];
+
 const paymentSchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: [true, "User is required"],
-    },
     booking: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Booking",
-      required: [true, "Booking is required"],
+      required: true,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     event: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Event",
-      required: [true, "Event is required"],
+      required: true,
     },
-    razorpayOrderId: { type: String, trim: true },
-    razorpayPaymentId: { type: String, trim: true },
-    razorpaySignature: { type: String, trim: true },
-    amount: { type: Number, required: [true, "Amount is required"], min: [0, "Amount cannot be negative"] },
-    currency: { type: String, default: "INR", trim: true },
+    razorpayOrderId: {
+      type: String,
+      index: true,
+    },
+    razorpayPaymentId: {
+      type: String,
+      index: true,
+    },
+    razorpaySignature: {
+      type: String,
+    },
+    amount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    currency: {
+      type: String,
+      default: "INR",
+    },
     status: {
       type: String,
-      enum: ["created", "pending", "paid", "failed", "refunded", "partially_refunded"],
+      enum: PAYMENT_STATUSES,
       default: "created",
     },
-    method: { type: String, default: "", trim: true },
-    failureReason: { type: String, default: "", trim: true },
-    refundId: { type: String, default: "", trim: true },
-    refundAmount: { type: Number, default: 0, min: 0 },
-    refundStatus: {
+    method: {
       type: String,
-      enum: ["", "pending", "processed", "failed"],
       default: "",
     },
-    refundedAt: { type: Date },
+    failureReason: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );
 
 paymentSchema.index({ razorpayOrderId: 1 }, { unique: true, sparse: true });
-paymentSchema.index({ razorpayPaymentId: 1 }, { unique: true, sparse: true });
 paymentSchema.index({ booking: 1 });
 paymentSchema.index({ user: 1, createdAt: -1 });
 
-module.exports = mongoose.model("Payment", paymentSchema);
+const Payment = mongoose.model("Payment", paymentSchema);
+
+module.exports = Payment;

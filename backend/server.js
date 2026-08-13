@@ -14,6 +14,7 @@ const {
   errorMiddleware,
   notFoundMiddleware,
 } = require("./middleware/errorMiddleware");
+const { expirePendingBookings } = require("./services/bookingService");
 
 const app = express();
 
@@ -85,6 +86,16 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   await connectDB();
+
+  // Expire stale pending bookings every 10 minutes (also runs on-demand in booking routes)
+  setInterval(() => {
+    expirePendingBookings()
+      .then((count) => {
+        if (count > 0) console.log(`[bookings] Expired ${count} pending booking(s)`);
+      })
+      .catch((error) => console.warn("[bookings] Expiry sweep failed:", error.message));
+  }, 10 * 60 * 1000);
+
   app.listen(PORT, () => {
     console.log(`[server] Eventora API running on http://localhost:${PORT}`);
   });

@@ -317,11 +317,11 @@ const publishEvent = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Cannot publish an event in the past.");
   }
 
-  event.status = "published";
+  event.status = "pending";
   await event.save();
 
   return successResponse(res, {
-    message: "Event published successfully.",
+    message: "Event submitted for review. An admin will approve it for publication.",
     data: { event: serializeDetailEvent(event) },
   });
 });

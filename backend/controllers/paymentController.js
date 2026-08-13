@@ -10,6 +10,7 @@ const {
   verifyRazorpaySignature,
   validateWebhookSignature,
   serializePayment,
+  initiateRefund,
 } = require("../services/paymentService");
 const { expirePendingBookings } = require("../services/bookingService");
 const { generateTicketsForBooking } = require("../services/ticketService");
@@ -63,6 +64,9 @@ const createOrder = asyncHandler(async (req, res) => {
 
   if (booking.paymentStatus === "paid") {
     throw new ApiError(400, "This booking is already paid.");
+  }
+  if (booking.paymentStatus === "refunded" || booking.bookingStatus === "refunded") {
+    throw new ApiError(400, "This booking has been refunded.");
   }
   if (booking.bookingStatus === "expired") {
     throw new ApiError(400, "This booking has expired. Please create a new booking.");
@@ -234,6 +238,19 @@ const getMyPayments = asyncHandler(async (req, res) => {
   });
 });
 
+const refundPayment = asyncHandler(async (req, res) => {
+  const result = await initiateRefund({
+    paymentId: req.params.paymentId,
+    requestedById: req.user._id,
+    isAdmin: req.user.role === "admin",
+  });
+
+  return successResponse(res, {
+    message: "Refund processed successfully.",
+    data: result,
+  });
+});
+
 const handleWebhook = asyncHandler(async (req, res) => {
   const signature = req.headers["x-razorpay-signature"];
   const rawBody = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : JSON.stringify(req.body);
@@ -285,6 +302,31 @@ const handleWebhook = asyncHandler(async (req, res) => {
     }
   }
 
+  if (event === "refund.processed") {
+    const { payment_id, id, status } = payload.refund.entity;
+    const payment = await Payment.findOne({ razorpayPaymentId: payment_id });
+    if (payment && payment.status !== "refunded") {
+      payment.refundId = id || payment.refundId;
+      payment.refundStatus = status || "processed";
+      payment.refundedAt = new Date();
+      payment.status = "refunded";
+      await payment.save();
+
+      const booking = await Booking.findById(payment.booking);
+      if (booking) {
+        booking.paymentStatus = "refunded";
+        booking.bookingStatus = "refunded";
+        await booking.save();
+        await mongoose.model("Ticket").updateMany(
+          { booking: booking._id },
+          { $set: { status: "cancelled" } }
+        );
+        const { releaseTickets } = require("../services/bookingService");
+        await releaseTickets(booking.event, booking.ticketTypeId, booking.quantity);
+      }
+    }
+  }
+
   return successResponse(res, { message: "Webhook processed." });
 });
 
@@ -293,5 +335,6 @@ module.exports = {
   verifyPayment,
   reportFailure,
   getMyPayments,
+  refundPayment,
   handleWebhook,
 };

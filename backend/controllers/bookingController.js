@@ -16,6 +16,9 @@ const {
   expirePendingBookings,
   serializeBooking,
 } = require("../services/bookingService");
+const { initiateRefund } = require("../services/paymentService");
+
+const REFUND_CUTOFF_HOURS = 48;
 
 const createBooking = asyncHandler(async (req, res) => {
   await expirePendingBookings();
@@ -148,7 +151,7 @@ const getBooking = asyncHandler(async (req, res) => {
 
 const cancelBooking = asyncHandler(async (req, res) => {
   const booking = await Booking.findById(req.params.id)
-    .populate("event", "organizer title date");
+    .populate("event", "organizer title date time");
 
   if (!booking) throw new ApiError(404, "Booking not found.");
 
@@ -165,22 +168,72 @@ const cancelBooking = asyncHandler(async (req, res) => {
   if (booking.bookingStatus === "completed" || booking.bookingStatus === "expired") {
     throw new ApiError(400, `A ${booking.bookingStatus} booking cannot be cancelled.`);
   }
-  if (booking.bookingStatus === "cancelled") {
-    throw new ApiError(400, "This booking is already cancelled.");
+  if (booking.bookingStatus === "cancelled" || booking.bookingStatus === "refunded") {
+    throw new ApiError(400, `This booking is already ${booking.bookingStatus}.`);
   }
 
   const wasPaid = booking.paymentStatus === "paid";
-  await releaseTickets(booking.event._id, booking.ticketTypeId, booking.quantity);
+  const wasRefunded = booking.paymentStatus === "refunded";
 
-  booking.bookingStatus = "cancelled";
-  if (!wasPaid) booking.paymentStatus = "cancelled";
-  await booking.save();
+  let message;
+  let refund;
+
+  if (wasPaid) {
+    const eventDate = booking.event.date ? new Date(booking.event.date) : null;
+    const hoursToEvent = eventDate ? (eventDate.getTime() - Date.now()) / 3600000 : Infinity;
+
+    if (hoursToEvent < REFUND_CUTOFF_HOURS) {
+      await releaseTickets(booking.event._id, booking.ticketTypeId, booking.quantity);
+      await require("../models/Ticket").updateMany(
+        { booking: booking._id },
+        { $set: { status: "cancelled" } }
+      );
+      booking.bookingStatus = "cancelled";
+      await booking.save();
+      message =
+        "Booking cancelled. Cancellation within the last 48 hours before the event is not eligible for a refund.";
+    } else {
+      const payment = await require("../models/Payment").findOne({
+        booking: booking._id,
+        status: "successful",
+      });
+      if (payment) {
+        refund = await initiateRefund({
+          paymentId: payment._id,
+          requestedById: req.user._id,
+          isAdmin,
+        });
+        booking.bookingStatus = "refunded";
+        booking.paymentStatus = "refunded";
+        await booking.save();
+        message = "Booking cancelled and full refund initiated.";
+      } else {
+        await releaseTickets(booking.event._id, booking.ticketTypeId, booking.quantity);
+        await require("../models/Ticket").updateMany(
+          { booking: booking._id },
+          { $set: { status: "cancelled" } }
+        );
+        booking.bookingStatus = "cancelled";
+        await booking.save();
+        message = "Booking cancelled successfully.";
+      }
+    }
+  } else if (wasRefunded) {
+    message = "Booking was already refunded.";
+  } else {
+    await releaseTickets(booking.event._id, booking.ticketTypeId, booking.quantity);
+    booking.bookingStatus = "cancelled";
+    booking.paymentStatus = "cancelled";
+    await booking.save();
+    message = "Booking cancelled successfully.";
+  }
 
   return successResponse(res, {
-    message: wasPaid
-      ? "Booking cancelled. Refund processing is handled by support."
-      : "Booking cancelled successfully.",
-    data: { booking: serializeBooking(booking) },
+    message,
+    data: {
+      booking: serializeBooking(booking),
+      refund: refund || null,
+    },
   });
 });
 

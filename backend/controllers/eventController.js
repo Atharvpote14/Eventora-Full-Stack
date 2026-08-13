@@ -337,8 +337,46 @@ const cancelEvent = asyncHandler(async (req, res) => {
   event.status = "cancelled";
   await event.save();
 
+  // Auto-cancel bookings and refund paid bookings
+  const Booking = require("../models/Booking");
+  const Payment = require("../models/Payment");
+  const Ticket = require("../models/Ticket");
+  const { releaseTickets } = require("../services/bookingService");
+  const { initiateRefund } = require("../services/paymentService");
+
+  const bookings = await Booking.find({ event: event._id });
+  for (const booking of bookings) {
+    if (booking.bookingStatus === "confirmed" && booking.paymentStatus === "paid") {
+      const payment = await Payment.findOne({
+        booking: booking._id,
+        status: "successful",
+      });
+      if (payment) {
+        await initiateRefund({
+          paymentId: payment._id,
+          requestedById: req.user._id,
+          isAdmin: false,
+        }).catch(async () => {
+          await releaseTickets(booking.event, booking.ticketTypeId, booking.quantity);
+          booking.bookingStatus = "cancelled";
+          await booking.save();
+        });
+      } else {
+        await releaseTickets(booking.event, booking.ticketTypeId, booking.quantity);
+        booking.bookingStatus = "cancelled";
+        await booking.save();
+      }
+    } else if (booking.bookingStatus === "pending") {
+      await releaseTickets(booking.event, booking.ticketTypeId, booking.quantity);
+      booking.bookingStatus = "cancelled";
+      booking.paymentStatus = "cancelled";
+      await booking.save();
+    }
+  }
+  await Ticket.updateMany({ event: event._id }, { $set: { status: "cancelled" } });
+
   return successResponse(res, {
-    message: "Event cancelled successfully.",
+    message: "Event cancelled successfully. Paid bookings have been refunded.",
     data: { event: serializeDetailEvent(event) },
   });
 });

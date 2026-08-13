@@ -5,9 +5,11 @@ const {
   verifyPayment,
   reportFailure,
   getMyPayments,
+  refundPayment,
   handleWebhook,
 } = require("../controllers/paymentController");
 const { authenticate } = require("../middleware/authMiddleware");
+const authorize = require("../middleware/roleMiddleware");
 const validate = require("../middleware/validationMiddleware");
 
 const router = express.Router();
@@ -49,6 +51,9 @@ router.post(
 );
 
 router.get("/my", authenticate, getMyPayments);
+
+// Refund: admin or event organizer only
+router.post("/:paymentId/refund", authenticate, authorize("organizer", "admin"), refundPayment);
 
 // Raw body required for signature validation
 router.post("/webhook", express.raw({ type: "application/json" }), handleWebhook);

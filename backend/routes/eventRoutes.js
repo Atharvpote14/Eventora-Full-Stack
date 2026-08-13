@@ -23,6 +23,10 @@ const {
   validateCreateEvent,
   validateUpdateEvent,
 } = require("../validators/eventValidators");
+const {
+  getEventReviewsController,
+  createEventReview,
+} = require("../controllers/reviewController");
 
 const router = express.Router();
 
@@ -32,6 +36,9 @@ router.get("/upcoming", getUpcomingEvents);
 router.get("/popular", getPopularEvents);
 router.get("/slug/:slug", optionalAuthenticate, getEventBySlug);
 router.get("/:id", optionalAuthenticate, getEventById);
+
+router.get("/:eventId/reviews", getEventReviewsController);
+router.post("/:eventId/reviews", authenticate, createEventReview);
 
 router.post(
   "/",

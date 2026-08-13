@@ -155,7 +155,15 @@ const getEventById = asyncHandler(async (req, res) => {
     event.viewCount += 1;
   }
 
-  return successResponse(res, { data: { event: serializeDetailEvent(event) } });
+  const { getRatingSummary } = require("../services/reviewService");
+  const { averageRating, reviewCount } = await getRatingSummary(event._id);
+
+  return successResponse(res, {
+    data: {
+      event: serializeDetailEvent(event),
+      ratingSummary: { averageRating, reviewCount },
+    },
+  });
 });
 
 const getEventBySlug = asyncHandler(async (req, res) => {
@@ -172,7 +180,15 @@ const getEventBySlug = asyncHandler(async (req, res) => {
     event.viewCount += 1;
   }
 
-  return successResponse(res, { data: { event: serializeDetailEvent(event) } });
+  const { getRatingSummary } = require("../services/reviewService");
+  const { averageRating, reviewCount } = await getRatingSummary(event._id);
+
+  return successResponse(res, {
+    data: {
+      event: serializeDetailEvent(event),
+      ratingSummary: { averageRating, reviewCount },
+    },
+  });
 });
 
 const createEvent = asyncHandler(async (req, res) => {

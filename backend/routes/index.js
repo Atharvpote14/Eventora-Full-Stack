@@ -10,6 +10,8 @@ const paymentRoutes = require("./paymentRoutes");
 const ticketRoutes = require("./ticketRoutes");
 const notificationRoutes = require("./notificationRoutes");
 const adminRoutes = require("./adminRoutes");
+const wishlistRoutes = require("./wishlistRoutes");
+const reviewRoutes = require("./reviewRoutes");
 
 const router = express.Router();
 
@@ -23,5 +25,7 @@ router.use("/payments", paymentRoutes);
 router.use("/tickets", ticketRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/admin", adminRoutes);
+router.use("/wishlist", wishlistRoutes);
+router.use("/reviews", reviewRoutes);
 
 module.exports = router;

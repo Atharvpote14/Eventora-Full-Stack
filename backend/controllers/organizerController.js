@@ -107,4 +107,162 @@ const requireOwnedEvent = async (eventId, user) => {
   return event;
 };
 
-module.exports = { getEventBookings, getEventAttendees };
+const getOrganizerDashboard = asyncHandler(async (req, res) => {
+  const Event = require("../models/Event");
+  const events = await Event.find({ organizer: req.user._id });
+  const eventIds = events.map((e) => e._id);
+
+  const bookings = await Booking.find({ event: { $in: eventIds } })
+    .populate("event", "title date slug")
+    .populate("user", "name email");
+
+  const publishedEvents = events.filter((e) => e.status === "published");
+  const now = new Date();
+
+  const totalEvents = events.length;
+  const publishedCount = publishedEvents.length;
+  const pendingEvents = events.filter((e) => e.status === "pending").length;
+  const upcomingEvents = publishedEvents.filter((e) => e.date >= now).length;
+
+  const availableCapacity = publishedEvents.reduce((sum, e) => {
+    const capacity = e.ticketTypes.reduce((s, t) => s + (t.capacity || 0), 0);
+    const sold = e.ticketTypes.reduce((s, t) => s + (t.sold || 0), 0);
+    return sum + Math.max(0, capacity - sold);
+  }, 0);
+
+  const totalBookings = bookings.length;
+  const ticketsSold = bookings
+    .filter((b) => b.bookingStatus === "confirmed")
+    .reduce((s, b) => s + b.quantity, 0);
+  const grossRevenue = bookings
+    .filter((b) => b.paymentStatus === "paid" || b.paymentStatus === "refunded")
+    .reduce((s, b) => s + b.amount, 0);
+  const refundedRevenue = bookings
+    .filter((b) => b.paymentStatus === "refunded")
+    .reduce((s, b) => s + b.amount, 0);
+  const totalRevenue = grossRevenue - refundedRevenue;
+
+  const recentBookings = [...bookings]
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, 5);
+
+  const recentEvents = [...events]
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, 5);
+
+  const eventPerformance = events
+    .map((e) => {
+      const eb = bookings.filter((b) => b.event._id.toString() === e._id.toString());
+      const sold = eb
+        .filter((b) => b.bookingStatus === "confirmed")
+        .reduce((s, b) => s + b.quantity, 0);
+      const revenue =
+        eb
+          .filter((b) => b.paymentStatus === "paid" || b.paymentStatus === "refunded")
+          .reduce((s, b) => s + b.amount, 0) -
+        eb
+          .filter((b) => b.paymentStatus === "refunded")
+          .reduce((s, b) => s + b.amount, 0);
+      const capacity = e.ticketTypes.reduce((s, t) => s + (t.capacity || 0), 0);
+      return {
+        _id: e._id,
+        title: e.title,
+        slug: e.slug,
+        date: e.date,
+        status: e.status,
+        ticketsSold: sold,
+        capacity,
+        revenue,
+        bookingsCount: eb.length,
+        fillRate: capacity ? Math.min(100, Math.round((sold / capacity) * 100)) : 0,
+      };
+    })
+    .sort((a, b) => b.revenue - a.revenue);
+
+  return successResponse(res, {
+    data: {
+      totalEvents,
+      publishedEvents: publishedCount,
+      pendingEvents,
+      totalBookings,
+      ticketsSold,
+      totalRevenue,
+      availableCapacity,
+      upcomingEvents,
+      recentBookings: recentBookings.map(serializeBooking),
+      recentEvents: recentEvents.map((e) => ({
+        _id: e._id,
+        title: e.title,
+        slug: e.slug,
+        date: e.date,
+        city: e.city,
+        status: e.status,
+      })),
+      eventPerformance,
+    },
+  });
+});
+
+const getOrganizerAnalytics = asyncHandler(async (req, res) => {
+  const Event = require("../models/Event");
+
+  const period = ["7d", "30d", "90d", "12m"].includes(req.query.period)
+    ? req.query.period
+    : "30d";
+  const days = period === "7d" ? 7 : period === "30d" ? 30 : period === "90d" ? 90 : 365;
+
+  const now = new Date();
+  const start = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (days - 1))
+  );
+
+  const eventIds = (await Event.find({ organizer: req.user._id }, "_id")).map((e) => e._id);
+
+  const bookings = await Booking.find({
+    event: { $in: eventIds },
+    createdAt: { $gte: start },
+  }).populate("event", "title");
+
+  const labels = [];
+  for (let i = 0; i < days; i += 1) {
+    labels.push(new Date(start.getTime() + i * 86400000).toISOString().slice(0, 10));
+  }
+
+  const byDay = (fn) =>
+    labels.map((label) =>
+      bookings
+        .filter((b) => b.createdAt.toISOString().slice(0, 10) === label)
+        .reduce(fn, 0)
+    );
+
+  const revenueValues = byDay(
+    (sum, b) => sum + (b.paymentStatus === "paid" ? b.amount : 0)
+  );
+  const bookingValues = byDay((sum) => sum + 1);
+  const ticketsSoldValues = byDay(
+    (sum, b) => sum + (b.bookingStatus === "confirmed" ? b.quantity : 0)
+  );
+
+  const perEvent = new Map();
+  for (const b of bookings) {
+    const key = b.event._id.toString();
+    if (!perEvent.has(key)) {
+      perEvent.set(key, { _id: b.event._id, title: b.event.title, revenue: 0, bookings: 0 });
+    }
+    const entry = perEvent.get(key);
+    entry.bookings += 1;
+    entry.revenue += b.paymentStatus === "paid" ? b.amount : 0;
+  }
+  const topEvents = [...perEvent.values()].sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+
+  return successResponse(res, {
+    data: {
+      revenue: { labels, values: revenueValues },
+      bookings: { labels, values: bookingValues },
+      ticketsSold: { labels, values: ticketsSoldValues },
+      topEvents,
+    },
+  });
+});
+
+module.exports = { getEventBookings, getEventAttendees, getOrganizerDashboard, getOrganizerAnalytics };

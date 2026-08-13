@@ -35,10 +35,16 @@ const getDashboard = asyncHandler(async (req, res) => {
     ]);
 
   const revenueResult = await Booking.aggregate([
-    { $match: { paymentStatus: "paid" } },
-    { $group: { _id: null, total: { $sum: "$total" } } },
+    { $match: { paymentStatus: { $in: ["paid", "refunded"] } } },
+    { $group: { _id: null, total: { $sum: "$amount" } } },
   ]);
-  const revenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
+  const refundedResult = await Booking.aggregate([
+    { $match: { paymentStatus: "refunded" } },
+    { $group: { _id: null, total: { $sum: "$amount" } } },
+  ]);
+  const revenue =
+    (revenueResult.length > 0 ? revenueResult[0].total : 0) -
+    (refundedResult.length > 0 ? refundedResult[0].total : 0);
 
   return successResponse(res, {
     data: {
@@ -313,10 +319,16 @@ const getAnalytics = asyncHandler(async (req, res) => {
   ]);
 
   const revenueResult = await Booking.aggregate([
-    { $match: { paymentStatus: "paid" } },
-    { $group: { _id: null, total: { $sum: "$total" } } },
+    { $match: { paymentStatus: { $in: ["paid", "refunded"] } } },
+    { $group: { _id: null, total: { $sum: "$amount" } } },
   ]);
-  const revenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
+  const refundedResult = await Booking.aggregate([
+    { $match: { paymentStatus: "refunded" } },
+    { $group: { _id: null, total: { $sum: "$amount" } } },
+  ]);
+  const revenue =
+    (revenueResult.length > 0 ? revenueResult[0].total : 0) -
+    (refundedResult.length > 0 ? refundedResult[0].total : 0);
 
   return successResponse(res, {
     data: {

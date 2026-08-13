@@ -43,4 +43,40 @@ const sendOtpEmail = async ({ email, name, otp, purpose }) => {
   });
 };
 
-module.exports = { sendEmail, sendOtpEmail };
+const sendBookingConfirmationEmail = async ({
+  email,
+  name,
+  eventName,
+  eventDate,
+  eventTime,
+  venue,
+  city,
+  ticketType,
+  quantity,
+  total,
+  bookingReference,
+  ticketNumbers,
+}) => {
+  const templateId = process.env.EMAILJS_CONFIRM_TEMPLATE_ID;
+  if (!templateId) return null;
+
+  return sendEmail({
+    templateId,
+    templateParams: {
+      to_email: email,
+      to_name: name || "there",
+      event_name: eventName,
+      event_date: eventDate,
+      event_time: eventTime,
+      venue: venue,
+      city: city,
+      ticket_type: ticketType,
+      quantity: quantity,
+      total_amount: total,
+      booking_number: bookingReference,
+      ticket_info: ticketNumbers.join(", "),
+    },
+  });
+};
+
+module.exports = { sendEmail, sendOtpEmail, sendBookingConfirmationEmail };

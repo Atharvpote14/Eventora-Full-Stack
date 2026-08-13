@@ -12,6 +12,38 @@ const {
   serializePayment,
 } = require("../services/paymentService");
 const { expirePendingBookings } = require("../services/bookingService");
+const { generateTicketsForBooking } = require("../services/ticketService");
+const { sendBookingConfirmationEmail } = require("../services/emailService");
+
+const confirmBooking = async (booking, user) => {
+  booking.paymentStatus = "paid";
+  booking.bookingStatus = "confirmed";
+  booking.expiresAt = null;
+  await booking.save();
+
+  const tickets = await generateTicketsForBooking(booking);
+
+  if (tickets.length > 0 && user) {
+    const Event = mongoose.model("Event");
+    const event = await Event.findById(booking.event).select("title date time venue city");
+    sendBookingConfirmationEmail({
+      email: user.email,
+      name: user.name,
+      eventName: event ? event.title : "",
+      eventDate: event && event.date ? event.date.toISOString().slice(0, 10) : "",
+      eventTime: event ? event.time : "",
+      venue: event ? event.venue : "",
+      city: event ? event.city : "",
+      ticketType: booking.ticketType,
+      quantity: booking.quantity,
+      total: booking.amount,
+      bookingReference: booking.bookingReference,
+      ticketNumbers: tickets.map((t) => t.ticketId),
+    }).catch(() => {});
+  }
+
+  return tickets;
+};
 
 const createOrder = asyncHandler(async (req, res) => {
   const { bookingId } = req.body;
@@ -136,10 +168,7 @@ const verifyPayment = asyncHandler(async (req, res) => {
   payment.method = "razorpay";
   await payment.save();
 
-  booking.paymentStatus = "paid";
-  booking.bookingStatus = "confirmed";
-  booking.expiresAt = null;
-  await booking.save();
+  await confirmBooking(booking, req.user);
 
   return successResponse(res, {
     message: "Payment verified successfully.",
@@ -232,10 +261,9 @@ const handleWebhook = asyncHandler(async (req, res) => {
           payment.status = "successful";
           await payment.save();
 
-          booking.paymentStatus = "paid";
-          booking.bookingStatus = "confirmed";
-          booking.expiresAt = null;
-          await booking.save();
+          const User = mongoose.model("User");
+          const user = await User.findById(booking.user);
+          await confirmBooking(booking, user);
         }
       }
     }

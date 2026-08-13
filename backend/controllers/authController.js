@@ -9,24 +9,12 @@ const {
 } = require("../services/authService");
 const { createOtp, verifyOtp } = require("../services/otpService");
 const { sendOtpEmail } = require("../services/emailService");
+const { sanitizeUser } = require("../services/userService");
 
 const PURPOSE = {
   REGISTRATION: "registration",
   FORGOT_PASSWORD: "forgot-password",
 };
-
-const sanitizeUser = (user) => ({
-  _id: user._id,
-  name: user.name,
-  email: user.email,
-  role: user.role,
-  isVerified: user.isVerified,
-  isActive: user.isActive,
-  profileImage: user.profileImage,
-  phone: user.phone,
-  city: user.city,
-  createdAt: user.createdAt,
-});
 
 const register = asyncHandler(async (req, res) => {
   const { name, email, password, phone = "", city = "" } = req.body;

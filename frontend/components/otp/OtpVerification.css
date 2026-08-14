@@ -1,6 +1,6 @@
 /* ==========================================================================
-   OTP Verification — orbit slots animation (Eventora edition)
-   Adapted from the standalone OTP Verification v3 (dark glass UI)
+   OTP Verification — horizontal row → circular orbit → success tick
+   (Eventora edition)
    ========================================================================== */
 
 .otp-verification {
@@ -11,9 +11,14 @@
 
 .otp-stage {
   position: relative;
-  width: 270px;
-  height: 262px;
+  width: 340px;
+  height: 88px;
   margin: 26px auto 10px;
+  transition: height 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.otp-stage--orbit {
+  height: 280px;
 }
 
 .otp-orbit {
@@ -24,6 +29,12 @@
   height: 160px;
   transform: translate(-50%, -50%);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.otp-orbit--active {
+  opacity: 1;
 }
 
 .otp-orbit__ring {
@@ -31,14 +42,24 @@
   height: 100%;
   overflow: visible;
   transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+.otp-orbit__ring--spinning {
+  animation: otpOrbitSpin 5s linear infinite;
 }
 
 .otp-orbit__ring circle {
   fill: none;
-  stroke: color-mix(in srgb, var(--color-ember-500) 30%, transparent);
+  stroke: color-mix(in srgb, var(--color-ember-500) 35%, transparent);
   stroke-width: 1.5;
   stroke-dasharray: 2 8;
   stroke-linecap: round;
+  transition: stroke 0.4s ease;
+}
+
+.otp-stage--success .otp-orbit__ring circle {
+  stroke: color-mix(in srgb, var(--color-moss-500) 60%, transparent);
 }
 
 .otp-orbit__hub {
@@ -51,6 +72,12 @@
   transform: translate(-50%, -50%);
   background: var(--color-ember-500);
   box-shadow: 0 0 18px color-mix(in srgb, var(--color-ember-500) 55%, transparent);
+  animation: otpHubPulse 1.2s ease-in-out infinite;
+}
+
+.otp-stage--success .otp-orbit__hub {
+  background: var(--color-moss-500);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--color-moss-500) 60%, transparent);
 }
 
 .otp-slots {
@@ -58,17 +85,39 @@
   inset: 0;
 }
 
-.otp-slot {
+.otp-orbit-carousel {
   position: absolute;
   left: 50%;
   top: 50%;
+  width: 0;
+  height: 0;
+  transform: rotate(0deg);
+}
+
+.otp-orbit-carousel--spinning {
+  animation: otpCarouselSpin 5s linear infinite;
+}
+
+@keyframes otpCarouselSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.otp-slot {
+  position: absolute;
+  left: 0;
+  top: 0;
   width: 50px;
   height: 64px;
   margin-left: -25px;
   margin-top: -32px;
   transform: translate(var(--x, 0px), var(--y, 0px));
   transform-origin: 50% 50%;
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .otp-input {
@@ -105,8 +154,26 @@
 }
 
 .otp-input:disabled {
-  opacity: 0.6;
+  opacity: 0.75;
   cursor: not-allowed;
+}
+
+.otp-success-check {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 84px;
+  height: 84px;
+  margin-left: -42px;
+  margin-top: -42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-moss-500);
+  background: color-mix(in srgb, var(--color-moss-500) 12%, transparent);
+  border: 2px solid color-mix(in srgb, var(--color-moss-500) 55%, transparent);
+  box-shadow: 0 0 35px color-mix(in srgb, var(--color-moss-500) 22%, transparent);
+  animation: otpSuccessIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .otp-status-row {
@@ -231,12 +298,44 @@
   }
 }
 
-.otp-shake {
-  animation: otpShake 0.42s ease;
+@keyframes otpOrbitSpin {
+  from {
+    transform: rotate(-90deg);
+  }
+  to {
+    transform: rotate(270deg);
+  }
 }
 
-.otp-success-pulse {
-  animation: otpSuccessPulse 0.55s ease;
+@keyframes otpHubPulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 1;
+  }
+}
+
+@keyframes otpSuccessIn {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.otp-shake {
+  animation: otpShake 0.42s ease;
 }
 
 @keyframes otpShake {
@@ -255,15 +354,9 @@
   }
 }
 
-@keyframes otpSuccessPulse {
-  50% {
-    transform: scale(1.06);
-  }
-}
-
-@media (max-width: 400px) {
+@media (max-width: 420px) {
   .otp-stage {
-    transform: scale(0.9);
+    transform: scale(0.7);
   }
 }
 
@@ -271,7 +364,8 @@
   .otp-stage,
   .otp-slot,
   .otp-input,
-  .otp-verify-btn {
+  .otp-verify-btn,
+  .otp-orbit {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }

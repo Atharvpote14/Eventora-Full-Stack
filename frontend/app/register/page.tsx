@@ -51,6 +51,7 @@ export default function RegisterPage() {
         city: city.trim() || undefined,
       });
       setStep("otp");
+      window.scrollTo({ top: 0, behavior: "instant" });
       setNotice(
         "We sent a verification code to your email. Enter it below to activate your account.",
       );
@@ -138,6 +139,7 @@ export default function RegisterPage() {
         <OtpVerification
           onVerify={async (code) => {
             await verifyOtp(email.trim(), code);
+            await new Promise((resolve) => setTimeout(resolve, 1100));
             router.push("/login?verified=1");
           }}
           onResend={async () => {

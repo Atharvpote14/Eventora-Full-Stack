@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import "./OtpVerification.css";
 
@@ -18,6 +18,11 @@ interface StatusOverride {
   text: string;
 }
 
+type Phase = "entry" | "orbiting" | "success";
+
+const ROW_PITCH = 58;
+const ORBIT_RADIUS = 108;
+
 export function OtpVerification({
   length = 6,
   lifetimeSeconds = 600,
@@ -25,33 +30,35 @@ export function OtpVerification({
   onVerify,
   onResend,
 }: OtpVerificationProps) {
+  const [phase, setPhase] = useState<Phase>("entry");
+  const [spinning, setSpinning] = useState(false);
   const [digits, setDigits] = useState<string[]>(() => Array(length).fill(""));
   const [secondsLeft, setSecondsLeft] = useState(lifetimeSeconds);
   const [resendLeft, setResendLeft] = useState(resendCooldownSeconds);
   const [status, setStatus] = useState<StatusOverride | null>(null);
-  const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
-  const [verified, setVerified] = useState(false);
   const [shake, setShake] = useState(false);
-  const [pulse, setPulse] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-  const slotRefs = useRef<Array<HTMLDivElement | null>>([]);
   const toastTimerRef = useRef<number | null>(null);
+  const spinTimerRef = useRef<number | null>(null);
 
   const expired = secondsLeft <= 0;
+  const orbiting = phase === "orbiting";
+  const success = phase === "success";
   const code = digits.join("");
   const complete = code.length === length;
 
-  const positions = Array.from({ length }, (_, i) => {
-    const t = length === 1 ? 0 : i / (length - 1);
-    const angle = -1 + t * 2;
-    const r = 100;
+  const slotPosition = (index: number) => {
+    if (phase === "entry") {
+      return { x: (index - (length - 1) / 2) * ROW_PITCH, y: 0 };
+    }
+    const angle = (index / length) * Math.PI * 2 - Math.PI / 2;
     return {
-      x: Math.round(Math.sin(angle) * r),
-      y: Math.round(-Math.cos(angle) * r),
+      x: Math.round(Math.sin(angle) * ORBIT_RADIUS),
+      y: Math.round(-Math.cos(angle) * ORBIT_RADIUS),
     };
-  });
+  };
 
   const showToast = (message: string) => {
     setToast(message);
@@ -79,7 +86,7 @@ export function OtpVerification({
   }, []);
 
   useEffect(() => {
-    inputRefs.current[0]?.focus();
+    inputRefs.current[0]?.focus({ preventScroll: true });
   }, []);
 
   const focusIndex = (index: number) => {
@@ -88,20 +95,6 @@ export function OtpVerification({
       el.focus();
       el.select();
     }
-  };
-
-  const animateSlot = (index: number) => {
-    const slot = slotRefs.current[index];
-    if (!slot) return;
-    const base = getComputedStyle(slot).transform;
-    slot.animate(
-      [
-        { transform: base, opacity: 0.65 },
-        { transform: `${base} scale(1.09)`, opacity: 1 },
-        { transform: base, opacity: 1 },
-      ],
-      { duration: 360, easing: "cubic-bezier(.22,.8,.18,1)" },
-    );
   };
 
   const updateDigits = (next: string[]) => {
@@ -115,10 +108,7 @@ export function OtpVerification({
       const next = [...digits];
       next[index] = digit;
       updateDigits(next);
-      if (digit) {
-        animateSlot(index);
-        focusIndex(index + 1);
-      }
+      if (digit) focusIndex(index + 1);
     };
 
   const handleKeyDown =
@@ -133,7 +123,7 @@ export function OtpVerification({
       } else if (event.key === "ArrowRight") {
         focusIndex(index + 1);
       } else if (event.key === "Enter") {
-        if (complete && !verifying && !expired) void verify();
+        if (complete && !orbiting && !expired) void verify();
       }
     };
 
@@ -157,27 +147,29 @@ export function OtpVerification({
       setStatus({ type: "bad", text: "Enter all digits" });
       return;
     }
-    setVerifying(true);
+    setPhase("orbiting");
+    if (spinTimerRef.current) window.clearTimeout(spinTimerRef.current);
+    spinTimerRef.current = window.setTimeout(() => setSpinning(true), 700);
     try {
       await onVerify(code);
-      setVerified(true);
-      setStatus({ type: "ok", text: "Verification successful" });
-      setPulse(true);
-      window.setTimeout(() => setPulse(false), 600);
+      if (spinTimerRef.current) window.clearTimeout(spinTimerRef.current);
+      setSpinning(false);
+      setPhase("success");
     } catch {
+      if (spinTimerRef.current) window.clearTimeout(spinTimerRef.current);
+      setSpinning(false);
+      setPhase("entry");
       setStatus({ type: "bad", text: "Incorrect verification code" });
       showToast("That code didn't match. Please try again.");
       setDigits(Array(length).fill(""));
       setShake(true);
       window.setTimeout(() => setShake(false), 450);
       focusIndex(0);
-    } finally {
-      setVerifying(false);
     }
   };
 
   const resend = async () => {
-    if (resendLeft > 0 || resending || verifying) return;
+    if (resendLeft > 0 || resending || orbiting) return;
     setResending(true);
     try {
       await onResend?.();
@@ -195,15 +187,19 @@ export function OtpVerification({
     }
   };
 
-  const statusText = expired
-    ? "Code expired"
-    : status
-      ? status.text
-      : complete
-        ? "Code ready to verify"
-        : "Waiting for code";
+  const statusText = success
+    ? "Verification successful"
+    : expired
+      ? "Code expired"
+      : status
+        ? status.text
+        : orbiting
+          ? "Verifying your code…"
+          : complete
+            ? "Code ready to verify"
+            : "Waiting for code";
 
-  const statusType = expired ? "bad" : status ? status.type : "";
+  const statusType = success ? "ok" : expired ? "bad" : status ? status.type : "";
   const minutes = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const seconds = String(secondsLeft % 60).padStart(2, "0");
 
@@ -212,46 +208,64 @@ export function OtpVerification({
       <div
         className={cn(
           "otp-stage",
+          phase === "entry" && "otp-stage--entry",
+          (orbiting || success) && "otp-stage--orbit",
+          success && "otp-stage--success",
           shake && "otp-shake",
-          pulse && "otp-success-pulse",
         )}
       >
-        <div className="otp-orbit" aria-hidden>
-          <svg className="otp-orbit__ring" viewBox="0 0 160 160">
+        <div
+          className={cn("otp-orbit", (orbiting || success) && "otp-orbit--active")}
+          aria-hidden
+        >
+          <svg
+            className={cn("otp-orbit__ring", orbiting && "otp-orbit__ring--spinning")}
+            viewBox="0 0 160 160"
+          >
             <circle cx="80" cy="80" r="58" />
           </svg>
           <div className="otp-orbit__hub" />
         </div>
 
-        <div className="otp-slots" role="group" aria-label="One-time password">
-          {positions.map((pos, index) => (
-            <div
-              key={index}
-              className="otp-slot"
-              ref={(el) => {
-                slotRefs.current[index] = el;
-              }}
-              style={{ "--x": `${pos.x}px`, "--y": `${pos.y}px` } as React.CSSProperties}
-            >
-              <input
-                ref={(el) => {
-                  inputRefs.current[index] = el;
-                }}
-                className={cn("otp-input", digits[index] && "otp-input-filled")}
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                maxLength={1}
-                aria-label={`Digit ${index + 1}`}
-                value={digits[index]}
-                disabled={verified || expired}
-                onChange={handleChange(index)}
-                onKeyDown={handleKeyDown(index)}
-                onPaste={handlePaste}
-              />
+        {!success && (
+          <div className="otp-slots" role="group" aria-label="One-time password">
+            <div className={cn("otp-orbit-carousel", spinning && "otp-orbit-carousel--spinning")}>
+              {Array.from({ length }, (_, index) => {
+                const pos = slotPosition(index);
+                return (
+                  <div
+                    key={index}
+                    className="otp-slot"
+                    style={{ "--x": `${pos.x}px`, "--y": `${pos.y}px` } as React.CSSProperties}
+                  >
+                    <input
+                      ref={(el) => {
+                        inputRefs.current[index] = el;
+                      }}
+                      className={cn("otp-input", digits[index] && "otp-input-filled")}
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={1}
+                      aria-label={`Digit ${index + 1}`}
+                      value={digits[index]}
+                      disabled={orbiting || expired}
+                      onChange={handleChange(index)}
+                      onKeyDown={handleKeyDown(index)}
+                      onPaste={handlePaste}
+                    />
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
+
+        {success && (
+          <div className="otp-success-check">
+            <Check width={40} height={40} strokeWidth={3} aria-hidden />
+          </div>
+        )}
       </div>
 
       <div className="otp-status-row">
@@ -266,9 +280,9 @@ export function OtpVerification({
         type="button"
         className="otp-verify-btn"
         onClick={() => void verify()}
-        disabled={!complete || verifying || expired}
+        disabled={!complete || orbiting || expired}
       >
-        <span>{verifying ? "Verifying…" : "Verify code"}</span>
+        <span>{orbiting ? "Verifying…" : "Verify code"}</span>
         <span className="otp-verify-arrow">
           <ArrowUpRight width={16} height={16} aria-hidden />
         </span>
@@ -278,7 +292,7 @@ export function OtpVerification({
         type="button"
         className="otp-resend-btn"
         onClick={() => void resend()}
-        disabled={resendLeft > 0 || resending || verifying}
+        disabled={resendLeft > 0 || resending || orbiting}
       >
         {resendLeft > 0 ? `Resend code in ${resendLeft}s` : "Resend code"}
       </button>

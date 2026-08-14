@@ -23,7 +23,10 @@ const getEventBookings = asyncHandler(async (req, res) => {
         venue: event.venue,
         ticketTypes: event.ticketTypes,
       },
-      bookings: bookings.map(serializeBooking),
+      bookings: bookings.map((b) => ({
+        ...serializeBooking(b),
+        user: b.user ? { name: b.user.name, email: b.user.email } : null,
+      })),
     },
     pagination: {
       page: req.pagination.page,
@@ -106,6 +109,68 @@ const requireOwnedEvent = async (eventId, user) => {
 
   return event;
 };
+
+const getOrganizerEvents = asyncHandler(async (req, res) => {
+  const { serializeListEvent } = require("../services/eventService");
+
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
+
+  const filter = { organizer: req.user._id };
+  const validStatuses = ["draft", "pending", "published", "rejected", "cancelled", "completed"];
+  if (req.query.status && validStatuses.includes(req.query.status)) {
+    filter.status = req.query.status;
+  }
+
+  const [events, total] = await Promise.all([
+    require("../models/Event")
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("category", "name slug image"),
+    require("../models/Event").countDocuments(filter),
+  ]);
+
+  return successResponse(res, {
+    data: events.map(serializeListEvent),
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+  });
+});
+
+const getOrganizerAllBookings = asyncHandler(async (req, res) => {
+  const Event = require("../models/Event");
+  const eventIds = (await Event.find({ organizer: req.user._id }, "_id")).map(
+    (e) => e._id
+  );
+
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
+
+  const filter = { event: { $in: eventIds } };
+  const valid = ["pending", "confirmed", "cancelled", "completed", "expired", "refunded", "failed"];
+  if (req.query.status && valid.includes(req.query.status)) {
+    filter.bookingStatus = req.query.status;
+  }
+
+  const [bookings, total] = await Promise.all([
+    Booking.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("event", "title date slug")
+      .populate("user", "name email"),
+    Booking.countDocuments(filter),
+  ]);
+
+  return successResponse(res, {
+    data: bookings.map((b) => ({
+      ...serializeBooking(b),
+      user: b.user ? { name: b.user.name, email: b.user.email } : null,
+    })),
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+  });
+});
 
 const getOrganizerDashboard = asyncHandler(async (req, res) => {
   const Event = require("../models/Event");
@@ -265,4 +330,11 @@ const getOrganizerAnalytics = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { getEventBookings, getEventAttendees, getOrganizerDashboard, getOrganizerAnalytics };
+module.exports = {
+  getEventBookings,
+  getEventAttendees,
+  getOrganizerDashboard,
+  getOrganizerAnalytics,
+  getOrganizerEvents,
+  getOrganizerAllBookings,
+};

@@ -106,6 +106,7 @@ export interface Booking {
   subtotal: number;
   fees: number;
   total: number;
+  user?: { name: string; email: string } | null;
   bookingStatus: "pending" | "confirmed" | "cancelled" | "expired" | "refunded";
   paymentStatus:
     | "pending"
@@ -199,4 +200,149 @@ export interface EventQuery {
   minPrice?: number;
   maxPrice?: number;
   sort?: string;
+}
+
+export interface EventPerformance {
+  _id: string;
+  title: string;
+  slug: string;
+  date: string;
+  status: string;
+  ticketsSold: number;
+  capacity: number;
+  revenue: number;
+  bookingsCount: number;
+  fillRate: number;
+}
+
+export interface OrganizerDashboard {
+  totalEvents: number;
+  publishedEvents: number;
+  pendingEvents: number;
+  totalBookings: number;
+  ticketsSold: number;
+  totalRevenue: number;
+  availableCapacity: number;
+  upcomingEvents: number;
+  recentBookings: Booking[];
+  recentEvents: {
+    _id: string;
+    title: string;
+    slug: string;
+    date: string;
+    city: string;
+    status: string;
+  }[];
+  eventPerformance: EventPerformance[];
+}
+
+export interface AnalyticsSeries {
+  labels: string[];
+  values: number[];
+}
+
+export interface OrganizerAnalytics {
+  revenue: AnalyticsSeries;
+  bookings: AnalyticsSeries;
+  ticketsSold: AnalyticsSeries;
+  topEvents: { _id: string; title: string; revenue: number; bookings: number }[];
+}
+
+export interface OrganizerEventBookings {
+  event: {
+    _id: string;
+    title: string;
+    slug: string;
+    date: string;
+    city: string;
+    venue: string;
+    ticketTypes: TicketType[];
+  };
+  bookings: Booking[];
+}
+
+export interface AdminDashboard {
+  users: number;
+  organizers: number;
+  events: number;
+  bookings: number;
+  payments: number;
+  revenue: number;
+  pendingEvents: number;
+}
+
+export interface AdminUser {
+  _id: string;
+  name: string;
+  email: string;
+  role: Role;
+  isVerified: boolean;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface AdminEvent {
+  _id: string;
+  title: string;
+  slug: string;
+  status: string;
+  city: string;
+  date: string;
+  coverImage: string;
+  minPrice: number;
+  maxPrice: number;
+  organizer: { _id: string; name: string; email: string } | null;
+  createdAt: string;
+}
+
+export interface AdminPayment {
+  _id: string;
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  method?: string;
+  createdAt: string;
+}
+
+export interface AdminAnalytics {
+  totals: {
+    users: number;
+    organizers: number;
+    events: number;
+    bookings: number;
+    revenue: number;
+  };
+  eventsByStatus: { _id: string; count: number }[];
+  topCategories: { name: string; slug: string; count: number }[];
+}
+
+export interface VerifyResult {
+  verified: boolean;
+  ticketNumber: string;
+  eventTitle: string;
+  ticketType: string;
+  attendee: string | null;
+  checkedInAt: string;
+}
+
+export interface EventPayload {
+  title: string;
+  description: string;
+  category: string;
+  eventType: string;
+  date: string;
+  startTime: string;
+  endTime?: string;
+  registrationDeadline?: string;
+  venue: string;
+  address: string;
+  city: string;
+  ticketTypes: { name: string; price: number; capacity: number; description?: string }[];
+  coverImage?: string;
+  gallery?: string[];
+  rules?: string[];
+  requirements?: string[];
+  faqs?: { question: string; answer: string }[];
 }

@@ -1,8 +1,10 @@
 import { request } from "@/lib/api";
 import type {
   Category,
+  EventDetail,
   EventDetailResponse,
   EventListItem,
+  EventPayload,
   EventQuery,
   Pagination,
   Review,
@@ -94,6 +96,42 @@ export const eventsService = {
       data: { rating, comment },
     });
     return res.data.review;
+  },
+};
+
+export const eventCrudService = {
+  async create(payload: EventPayload): Promise<EventDetail> {
+    const res = await request<{ event: EventDetail }>({
+      method: "POST",
+      url: "/events",
+      data: payload,
+    });
+    return res.data.event;
+  },
+
+  async update(id: string, payload: Partial<EventPayload>): Promise<EventDetail> {
+    const res = await request<{ event: EventDetail }>({
+      method: "PUT",
+      url: `/events/${id}`,
+      data: payload,
+    });
+    return res.data.event;
+  },
+
+  async publish(id: string): Promise<EventDetail> {
+    const res = await request<{ event: EventDetail }>({
+      method: "PATCH",
+      url: `/events/${id}/publish`,
+    });
+    return res.data.event;
+  },
+
+  async cancel(id: string): Promise<void> {
+    await request<null>({ method: "PATCH", url: `/events/${id}/cancel` });
+  },
+
+  async remove(id: string): Promise<void> {
+    await request<null>({ method: "DELETE", url: `/events/${id}` });
   },
 };
 

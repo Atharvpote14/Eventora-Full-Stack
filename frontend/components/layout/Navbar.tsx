@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Heart, LogOut, Menu, Moon, Search, Sun, Ticket, User2, X } from "lucide-react";
+import { Bell, Heart, LayoutDashboard, LogOut, Menu, Moon, Search, Sun, Ticket, User2, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn, initials } from "@/lib/utils";
@@ -183,6 +183,16 @@ export function Navbar() {
                   >
                     <Bell className="h-4 w-4" aria-hidden /> Notifications
                   </Link>
+                  {user.role !== "user" && (
+                    <Link
+                      href={user.role === "admin" ? "/admin" : "/organizer"}
+                      onClick={closeMenus}
+                      className="flex items-center gap-2.5 border-t border-ink-800 px-4 py-2.5 text-sm text-paper-dim transition-colors hover:bg-ink-800 hover:text-paper"
+                    >
+                      <LayoutDashboard className="h-4 w-4" aria-hidden />{" "}
+                      {user.role === "admin" ? "Admin dashboard" : "Organizer dashboard"}
+                    </Link>
+                  )}
                   <button
                     type="button"
                     onClick={() => void logout()}

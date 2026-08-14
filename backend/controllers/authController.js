@@ -20,17 +20,27 @@ const register = asyncHandler(async (req, res) => {
   const { name, email, password, phone = "", city = "" } = req.body;
 
   const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
-  if (existingUser) {
+  if (existingUser && existingUser.isVerified) {
     throw new ApiError(409, "An account with this email already exists.");
   }
 
-  const user = await User.create({
-    name: name.trim(),
-    email: email.toLowerCase().trim(),
-    password,
-    phone: phone.trim(),
-    city: city.trim(),
-  });
+  let user;
+  if (existingUser) {
+    existingUser.name = name.trim();
+    existingUser.password = password;
+    existingUser.phone = phone.trim();
+    existingUser.city = city.trim();
+    await existingUser.save();
+    user = existingUser;
+  } else {
+    user = await User.create({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      password,
+      phone: phone.trim(),
+      city: city.trim(),
+    });
+  }
 
   try {
     const otp = await createOtp(user.email, PURPOSE.REGISTRATION);

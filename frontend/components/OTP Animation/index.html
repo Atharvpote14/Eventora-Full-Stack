@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="OTP Verification v3">
+  <title>OTP Verification v3</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="card" aria-labelledby="title">
+      <div class="brand-mark" aria-hidden="true">
+        <div class="brand-dot"></div>
+        <div class="brand-ring"></div>
+      </div>
+
+      <p class="eyebrow">SECURE ACCESS</p>
+      <h1 id="title">OTP Verification <span>v3</span></h1>
+      <p class="subtitle">
+        Enter the 4-digit verification code sent to your device.
+      </p>
+
+      <div class="verification-stage">
+        <div class="orbit" aria-hidden="true">
+          <svg class="orbit__ring" viewBox="0 0 160 160">
+            <circle cx="80" cy="80" r="58"></circle>
+          </svg>
+          <div class="orbit__hub"></div>
+        </div>
+
+        <div class="slots" id="slots" role="group" aria-label="One-time password">
+          <label class="slot">
+            <input
+              class="otp-input"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              maxlength="1"
+              aria-label="Digit 1"
+            >
+          </label>
+          <label class="slot">
+            <input
+              class="otp-input"
+              type="text"
+              inputmode="numeric"
+              maxlength="1"
+              aria-label="Digit 2"
+            >
+          </label>
+          <label class="slot">
+            <input
+              class="otp-input"
+              type="text"
+              inputmode="numeric"
+              maxlength="1"
+              aria-label="Digit 3"
+            >
+          </label>
+          <label class="slot">
+            <input
+              class="otp-input"
+              type="text"
+              inputmode="numeric"
+              maxlength="1"
+              aria-label="Digit 4"
+            >
+          </label>
+        </div>
+      </div>
+
+      <div class="status-row">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Waiting for code</span>
+        <span class="timer" id="timer">00:30</span>
+      </div>
+
+      <button class="verify-btn" id="verifyBtn" type="button">
+        <span>Verify code</span>
+        <span class="arrow">↗</span>
+      </button>
+
+      <button class="resend-btn" id="resendBtn" type="button" disabled>
+        Resend code <span id="resendTimer">30s</span>
+      </button>
+
+      <p class="demo-hint">
+        Demo OTP: <strong>1234</strong>
+      </p>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>

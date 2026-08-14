@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+
+  --t-ink-950: #f5f4ef;
+  --t-ink-900: #fbfaf7;
+  --t-ink-850: #ffffff;
+  --t-ink-800: #ebe9e2;
+  --t-ink-700: #dcd9d0;
+  --t-ink-600: #c9c5ba;
+
+  --t-paper: #211f1a;
+  --t-paper-dim: #5c584e;
+  --t-paper-faint: #8b867a;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --t-ink-950: #0b0c0f;
+  --t-ink-900: #101116;
+  --t-ink-850: #14161b;
+  --t-ink-800: #191b21;
+  --t-ink-700: #23252d;
+  --t-ink-600: #2e313a;
+
+  --t-paper: #f4f1ea;
+  --t-paper-dim: #b5b1a8;
+  --t-paper-faint: #77746c;
+}
+
+@theme {
+  --color-ink-950: var(--t-ink-950);
+  --color-ink-900: var(--t-ink-900);
+  --color-ink-850: var(--t-ink-850);
+  --color-ink-800: var(--t-ink-800);
+  --color-ink-700: var(--t-ink-700);
+  --color-ink-600: var(--t-ink-600);
+
+  --color-paper: var(--t-paper);
+  --color-paper-dim: var(--t-paper-dim);
+  --color-paper-faint: var(--t-paper-faint);
+
+  --color-ember-300: #ff8a5c;
+  --color-ember-400: #f26b3c;
+  --color-ember-500: #e4572e;
+  --color-ember-600: #c94a22;
+  --color-ember-700: #a63b1b;
+
+  --color-moss-500: #3ecf8e;
+  --color-sand-500: #e8b84b;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-ink-950);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-ember-500) 70%, transparent);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ink-950);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-600);
+  border-radius: 8px;
+  border: 2px solid var(--color-ink-950);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-700);
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@utility surface {
+  background-color: var(--color-ink-850);
+  border: 1px solid var(--color-ink-700);
+  border-radius: var(--radius-lg);
+}
+
+@utility surface-hover {
+  &:hover {
+    border-color: var(--color-ink-600);
+  }
+}
+
+@utility ember-glow {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-ember-500) 35%, transparent),
+    0 8px 28px -8px color-mix(in srgb, var(--color-ember-500) 45%, transparent);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-ink-800) 25%,
+    var(--color-ink-700) 50%,
+    var(--color-ink-800) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up {
+  animation: fade-up 0.4s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton,
+  .fade-up {
+    animation: none;
+  }
+}

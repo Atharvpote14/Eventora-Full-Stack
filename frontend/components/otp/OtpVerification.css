@@ -1,0 +1,278 @@
+/* ==========================================================================
+   OTP Verification — orbit slots animation (Eventora edition)
+   Adapted from the standalone OTP Verification v3 (dark glass UI)
+   ========================================================================== */
+
+.otp-verification {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.otp-stage {
+  position: relative;
+  width: 270px;
+  height: 262px;
+  margin: 26px auto 10px;
+}
+
+.otp-orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 160px;
+  height: 160px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.otp-orbit__ring {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+
+.otp-orbit__ring circle {
+  fill: none;
+  stroke: color-mix(in srgb, var(--color-ember-500) 30%, transparent);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 8;
+  stroke-linecap: round;
+}
+
+.otp-orbit__hub {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color-ember-500);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--color-ember-500) 55%, transparent);
+}
+
+.otp-slots {
+  position: absolute;
+  inset: 0;
+}
+
+.otp-slot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 50px;
+  height: 64px;
+  margin-left: -25px;
+  margin-top: -32px;
+  transform: translate(var(--x, 0px), var(--y, 0px));
+  transform-origin: 50% 50%;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.otp-input {
+  width: 50px;
+  height: 64px;
+  border: 1px solid var(--color-ink-700);
+  border-radius: 13px;
+  outline: none;
+  color: var(--color-paper);
+  text-align: center;
+  font-size: 27px;
+  font-weight: 700;
+  caret-color: var(--color-ember-500);
+  background: var(--color-ink-900);
+  font-family: inherit;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.otp-input:focus {
+  border-color: color-mix(in srgb, var(--color-ember-500) 70%, transparent);
+  background: var(--color-ink-850);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--color-ember-500) 14%, transparent),
+    0 0 25px color-mix(in srgb, var(--color-ember-500) 12%, transparent);
+  transform: translateY(-2px);
+}
+
+.otp-input-filled {
+  border-color: color-mix(in srgb, var(--color-ember-500) 55%, transparent);
+}
+
+.otp-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.otp-status-row {
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--color-paper-dim);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.otp-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-ink-600);
+}
+
+.otp-status-dot--ok {
+  background: var(--color-moss-500);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--color-moss-500) 55%, transparent);
+}
+
+.otp-status-dot--bad {
+  background: #ff4d6a;
+  box-shadow: 0 0 12px rgba(255, 77, 106, 0.45);
+}
+
+.otp-timer {
+  margin-left: 3px;
+  color: var(--color-paper-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.otp-verify-btn {
+  width: 100%;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 22px;
+  padding: 0 14px 0 21px;
+  cursor: pointer;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  border-radius: 12px;
+  border: 0;
+  background: linear-gradient(180deg, var(--color-ember-400) 0%, var(--color-ember-500) 100%);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--color-ember-500) 25%, transparent);
+  font-family: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.otp-verify-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--color-ember-500) 35%, transparent);
+}
+
+.otp-verify-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.otp-verify-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.otp-verify-arrow {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.otp-resend-btn {
+  margin-top: 17px;
+  color: var(--color-paper-dim);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: inherit;
+  transition: color 0.2s ease;
+}
+
+.otp-resend-btn:not(:disabled):hover {
+  color: var(--color-paper);
+}
+
+.otp-resend-btn:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.otp-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  z-index: 60;
+  padding: 11px 16px;
+  border: 1px solid var(--color-ink-700);
+  border-radius: 999px;
+  color: var(--color-paper);
+  background: var(--color-ink-850);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+  font-size: 11px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 12px);
+  animation: otpToastIn 0.25s ease forwards;
+}
+
+@keyframes otpToastIn {
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.otp-shake {
+  animation: otpShake 0.42s ease;
+}
+
+.otp-success-pulse {
+  animation: otpSuccessPulse 0.55s ease;
+}
+
+@keyframes otpShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-7px);
+  }
+  50% {
+    transform: translateX(7px);
+  }
+  75% {
+    transform: translateX(-4px);
+  }
+}
+
+@keyframes otpSuccessPulse {
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@media (max-width: 400px) {
+  .otp-stage {
+    transform: scale(0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .otp-stage,
+  .otp-slot,
+  .otp-input,
+  .otp-verify-btn {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

@@ -133,7 +133,7 @@ export function OverviewTab() {
                   <tr key={booking._id} className="border-t border-ink-800">
                     <Td>
                       <p className="max-w-48 truncate font-medium text-paper">
-                        {booking.event.title}
+                        {booking.event?.title ?? "Event removed"}
                       </p>
                       <p className="text-xs text-paper-faint">{timeAgo(booking.createdAt)}</p>
                     </Td>

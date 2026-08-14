@@ -44,6 +44,7 @@ export interface EventListItem {
   date: string;
   startTime: string;
   coverImage: string;
+  heroImage?: string;
   minPrice: number;
   maxPrice: number;
   status: string;
@@ -341,6 +342,8 @@ export interface EventPayload {
   city: string;
   ticketTypes: { name: string; price: number; capacity: number; description?: string }[];
   coverImage?: string;
+  heroImage?: string;
+  featured?: boolean;
   gallery?: string[];
   rules?: string[];
   requirements?: string[];

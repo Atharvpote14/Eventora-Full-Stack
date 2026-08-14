@@ -45,16 +45,17 @@ const createReview = async (userId, eventId, { rating, comment }) => {
   const event = await Event.findById(eventId);
   if (!event) throw new ApiError(404, "Event not found.");
 
-  const booking = await Booking.findOne({
-    event: eventId,
-    user: userId,
-    bookingStatus: "confirmed",
-    paymentStatus: "paid",
-  });
+  const booking = await Booking.findOne({ event: eventId, user: userId });
   if (!booking) {
     throw new ApiError(
       403,
-      "Only attendees with a confirmed paid booking can review this event."
+      "You must book this event before you can review it. Only attendees with a confirmed paid booking can review."
+    );
+  }
+  if (booking.bookingStatus !== "confirmed" || booking.paymentStatus !== "paid") {
+    throw new ApiError(
+      403,
+      `Only attendees with a confirmed paid booking can review this event. Your booking is currently ${booking.bookingStatus} (payment: ${booking.paymentStatus}).`
     );
   }
 

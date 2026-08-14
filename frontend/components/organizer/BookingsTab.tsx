@@ -149,10 +149,10 @@ export function BookingsTab() {
               <tr key={booking._id} className="border-t border-ink-800">
                 <Td>
                   <p className="max-w-44 truncate font-medium text-paper">
-                    {booking.event.title}
+                    {booking.event?.title ?? "Event removed"}
                   </p>
                   <p className="text-xs text-paper-faint">
-                    {formatDateTime(booking.event.date)}
+                    {booking.event ? formatDateTime(booking.event.date) : "—"}
                   </p>
                 </Td>
                 <Td className="font-mono text-xs text-paper">{booking.reference}</Td>

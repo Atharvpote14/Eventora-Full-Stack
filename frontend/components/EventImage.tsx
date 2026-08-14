@@ -12,6 +12,7 @@ export function EventImage({
   className,
   imgClassName,
   priority,
+  darkFallback,
 }: {
   src: string;
   alt: string;
@@ -19,6 +20,7 @@ export function EventImage({
   className?: string;
   imgClassName?: string;
   priority?: boolean;
+  darkFallback?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
 
@@ -28,11 +30,17 @@ export function EventImage({
         role="img"
         aria-label={alt}
         className={cn(
-          "flex h-full w-full items-center justify-center bg-gradient-to-br from-ink-800 via-ink-850 to-ember-900/30",
+          "flex h-full w-full items-center justify-center",
+          darkFallback
+            ? "bg-gradient-to-br from-neutral-800 via-neutral-900 to-black"
+            : "bg-gradient-to-br from-ink-800 via-ink-850 to-ember-900/30",
           className,
         )}
       >
-        <CalendarDays className="h-10 w-10 text-ink-600" aria-hidden />
+        <CalendarDays
+          className={cn("h-10 w-10", darkFallback ? "text-neutral-600" : "text-ink-600")}
+          aria-hidden
+        />
       </div>
     );
   }

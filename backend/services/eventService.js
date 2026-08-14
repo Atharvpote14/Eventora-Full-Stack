@@ -25,6 +25,7 @@ const serializeListEvent = (event) => {
     date: event.date,
     startTime: event.startTime,
     coverImage: event.coverImage,
+    heroImage: event.heroImage,
     minPrice,
     maxPrice,
     status: event.status,

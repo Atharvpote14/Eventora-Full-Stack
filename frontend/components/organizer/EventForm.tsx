@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, Star, X } from "lucide-react";
 import { categoriesService, eventCrudService } from "@/services/events";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -56,6 +56,8 @@ export function EventForm({
   const [address, setAddress] = useState(event?.address ?? "");
   const [city, setCity] = useState(event?.city ?? "");
   const [coverImage, setCoverImage] = useState(event?.coverImage ?? "");
+  const [heroImage, setHeroImage] = useState(event?.heroImage ?? "");
+  const [featured, setFeatured] = useState(event?.featured ?? false);
   const [rulesText, setRulesText] = useState((event?.rules ?? []).join("\n"));
   const [requirementsText, setRequirementsText] = useState(
     (event?.requirements ?? []).join("\n"),
@@ -146,6 +148,8 @@ export function EventForm({
       address: address.trim(),
       city: city.trim(),
       coverImage: coverImage.trim() || undefined,
+      heroImage: heroImage.trim() || undefined,
+      featured: featured || undefined,
       ticketTypes: parsedTickets,
       rules: rulesText.split("\n").map((s) => s.trim()).filter(Boolean),
       requirements: requirementsText.split("\n").map((s) => s.trim()).filter(Boolean),
@@ -280,8 +284,33 @@ export function EventForm({
             label="Cover image URL"
             value={coverImage}
             onChange={(e) => setCoverImage(e.target.value)}
-            helper="Optional for drafts; required before publishing."
+            helper="Used for event cards and the event page. Optional for drafts; required before publishing."
           />
+
+          <Input
+            label="Hero banner image URL"
+            value={heroImage}
+            onChange={(e) => setHeroImage(e.target.value)}
+            helper="Used for the big home page hero slider. Can be a different image from the cover. Required before publishing."
+          />
+
+          <label className="flex cursor-pointer items-start gap-3 rounded-md border border-ink-700 bg-ink-900 p-3.5">
+            <input
+              type="checkbox"
+              checked={featured}
+              onChange={(e) => setFeatured(e.target.checked)}
+              className="mt-0.5 h-4 w-4 accent-ember-500"
+            />
+            <span>
+              <span className="flex items-center gap-1.5 text-sm font-medium text-paper">
+                <Star className="h-3.5 w-3.5 text-ember-400" aria-hidden />
+                Feature this event
+              </span>
+              <span className="mt-0.5 block text-xs text-paper-faint">
+                Featured events appear in the hero slider on the home page.
+              </span>
+            </span>
+          </label>
 
           <div>
             <div className="mb-1.5 flex items-center justify-between">

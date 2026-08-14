@@ -116,8 +116,8 @@ function ConfirmationContent() {
           <>
             <ReceiptPrinter
               reference={booking.reference}
-              eventTitle={booking.event.title}
-              eventDate={formatDate(booking.event.date)}
+              eventTitle={booking.event?.title ?? "Event no longer available"}
+              eventDate={booking.event ? formatDate(booking.event.date) : "—"}
               ticketTypeName={booking.ticketType.name}
               quantity={booking.quantity}
               unitPrice={booking.unitPrice}
@@ -161,13 +161,18 @@ function ConfirmationContent() {
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-paper-faint">Event</dt>
-                <dd className="text-right font-medium text-paper">{booking.event.title}</dd>
+                <dd className="text-right font-medium text-paper">
+                  {booking.event?.title ?? "Event no longer available"}
+                </dd>
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-paper-faint">Date</dt>
                 <dd className="text-paper">
-                  {formatDate(booking.event.date)}
-                  {booking.event.startTime ? ` · ${formatTime(booking.event.startTime)}` : ""}
+                  {booking.event
+                    ? `${formatDate(booking.event.date)}${
+                        booking.event.startTime ? ` · ${formatTime(booking.event.startTime)}` : ""
+                      }`
+                    : "—"}
                 </dd>
               </div>
               <div className="flex justify-between gap-4">

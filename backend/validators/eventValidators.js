@@ -105,6 +105,16 @@ const validateEventBase = (body, { partial = false } = {}) => {
     if (image && !/^https?:\/\/.+/.test(image)) return "Cover image must be a valid URL";
   });
 
+  check("heroImage", "Hero banner image", () => {
+    const image = (body.heroImage || "").trim();
+    if (image && !/^https?:\/\/.+/.test(image)) return "Hero banner image must be a valid URL";
+  });
+
+  check("featured", "Featured", () => {
+    if (body.featured !== undefined && typeof body.featured !== "boolean")
+      return "Featured must be a boolean";
+  });
+
   if (body.ticketTypes !== undefined) {
     const ticketErrors = validateTicketTypes(body.ticketTypes);
     if (ticketErrors.ticketTypes) errors.ticketTypes = ticketErrors.ticketTypes;

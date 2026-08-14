@@ -45,14 +45,14 @@ export function EventCard({
         className,
       )}
     >
-      <div className="relative aspect-[4/5] overflow-hidden">
+      <div className="relative aspect-[3/4] overflow-hidden">
         <EventImage
           src={event.coverImage}
           alt={event.title}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="transition-transform duration-300 group-hover:scale-[1.03]"
         />
-        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2.5">
+        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2">
           <Badge variant="accent">{categoryName(event.category)}</Badge>
           <button
             type="button"
@@ -60,23 +60,23 @@ export function EventCard({
             aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
             aria-pressed={wishlisted}
             className={cn(
-              "flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-colors",
+              "flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-sm transition-colors",
               wishlisted
                 ? "bg-ember-500 text-white"
                 : "bg-ink-950/60 text-paper hover:bg-ink-950/80",
             )}
           >
-            <Heart className={cn("h-4 w-4", wishlisted && "fill-current")} aria-hidden />
+            <Heart className={cn("h-3.5 w-3.5", wishlisted && "fill-current")} aria-hidden />
           </button>
         </div>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-ink-950/80 to-transparent" />
-        <p className="absolute bottom-2.5 left-2.5 flex items-center gap-1.5 text-xs font-semibold text-paper">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-ink-950/80 to-transparent" />
+        <p className="absolute bottom-2 left-2 flex items-center gap-1.5 text-xs font-semibold text-paper">
           <CalendarDays className="h-3.5 w-3.5 text-ember-400" aria-hidden />
           {formatDate(event.date)}
         </p>
       </div>
-      <div className="p-3.5">
-        <h3 className="line-clamp-1 text-sm font-semibold text-paper group-hover:text-ember-300">
+      <div className="p-3">
+        <h3 className="line-clamp-1 text-[13px] font-semibold text-paper group-hover:text-ember-300">
           {event.title}
         </h3>
         <p className="mt-1 flex items-center gap-1 text-xs text-paper-dim">
@@ -86,8 +86,8 @@ export function EventCard({
             {event.venue ? ` · ${event.venue}` : ""}
           </span>
         </p>
-        <div className="mt-2.5 flex items-center justify-between">
-          <p className="text-sm font-bold text-paper">
+        <div className="mt-2 flex items-center justify-between">
+          <p className="text-[13px] font-bold text-paper">
             {event.minPrice > 0 ? (
               <>
                 From <span className="text-ember-400">{formatINR(event.minPrice)}</span>

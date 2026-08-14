@@ -199,7 +199,8 @@ function BookingsTab() {
   return (
     <ul className="space-y-3">
       {bookings.map((booking) => {
-        const cancellable = ["pending", "confirmed"].includes(booking.bookingStatus);
+        const event = booking.event;
+        const cancellable = !!event && ["pending", "confirmed"].includes(booking.bookingStatus);
         return (
           <li
             key={booking._id}
@@ -207,14 +208,17 @@ function BookingsTab() {
           >
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="font-semibold text-paper">{booking.event.title}</h3>
+                <h3 className="font-semibold text-paper">
+                  {event?.title ?? "Event no longer available"}
+                </h3>
                 <Badge variant={BOOKING_TONE[booking.bookingStatus]}>
                   {booking.bookingStatus}
                 </Badge>
               </div>
               <p className="mt-1 text-sm text-paper-dim">
-                {formatDateTime(booking.event.date, booking.event.startTime)} ·{" "}
-                {booking.event.city}
+                {event
+                  ? `${formatDateTime(event.date, event.startTime)} · ${event.city}`
+                  : "This event has been removed from Eventora."}
               </p>
               <p className="mt-1 text-xs text-paper-faint">
                 {booking.ticketType.name} × {booking.quantity} · {booking.reference}
@@ -232,14 +236,14 @@ function BookingsTab() {
             <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
               <span className="font-bold text-paper">{formatINR(booking.total)}</span>
               <div className="flex gap-2">
-                {booking.bookingStatus === "confirmed" && (
+                {event && booking.bookingStatus === "confirmed" && (
                   <Link href={`/confirmation?bookingId=${booking._id}`}>
                     <Button variant="outline" size="sm">
                       View
                     </Button>
                   </Link>
                 )}
-                {booking.bookingStatus === "pending" && (
+                {event && booking.bookingStatus === "pending" && (
                   <Link href={`/checkout?bookingId=${booking._id}`}>
                     <Button variant="primary" size="sm">
                       Complete payment

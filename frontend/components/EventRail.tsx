@@ -20,9 +20,9 @@ export function EventRail({
 }) {
   return (
     <section className={className}>
-      <div className="mb-5 flex items-end justify-between gap-4">
+      <div className="mb-4 flex items-end justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-paper sm:text-2xl">
+          <h2 className="text-lg font-semibold tracking-tight text-paper sm:text-xl">
             {title}
           </h2>
           {subtitle && <p className="mt-1 text-sm text-paper-dim">{subtitle}</p>}
@@ -38,9 +38,11 @@ export function EventRail({
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
           {Array.from({ length: 5 }).map((_, index) => (
-            <SkeletonCard key={index} />
+            <div key={index} className="w-[140px] shrink-0 sm:w-[230px] sm:flex-none">
+              <SkeletonCard />
+            </div>
           ))}
         </div>
       ) : events.length === 0 ? (
@@ -48,12 +50,12 @@ export function EventRail({
           No events found yet.
         </p>
       ) : (
-        <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
+        <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
           {events.map((event) => (
             <EventCard
               key={event._id}
               event={event}
-              className="w-[160px] shrink-0 snap-start sm:w-auto sm:flex-1 sm:min-w-0"
+              className="w-[140px] shrink-0 snap-start sm:w-[230px] sm:flex-none"
             />
           ))}
         </div>

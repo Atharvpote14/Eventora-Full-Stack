@@ -206,10 +206,12 @@ const createEvent = asyncHandler(async (req, res) => {
     city,
     ticketTypes,
     coverImage,
+    heroImage,
     gallery,
     rules,
     requirements,
     faqs,
+    featured,
   } = req.body;
 
   const category = await resolveCategory(categoryValue);
@@ -237,10 +239,12 @@ const createEvent = asyncHandler(async (req, res) => {
     ticketTypes,
     capacity,
     coverImage: coverImage || "",
+    heroImage: heroImage || "",
     gallery: gallery || [],
     rules: rules || [],
     requirements: requirements || [],
     faqs: faqs || [],
+    featured: featured === true,
   });
 
   return successResponse(
@@ -262,7 +266,7 @@ const updateEvent = asyncHandler(async (req, res) => {
   }
 
   const update = {};
-  const { title, description, category: categoryValue, eventType, date, startTime, endTime, registrationDeadline, venue, address, city, ticketTypes, coverImage, gallery, rules, requirements, faqs } = req.body;
+  const { title, description, category: categoryValue, eventType, date, startTime, endTime, registrationDeadline, venue, address, city, ticketTypes, coverImage, heroImage, gallery, rules, requirements, faqs, featured } = req.body;
 
   if (title !== undefined) {
     update.title = title.trim();
@@ -285,10 +289,12 @@ const updateEvent = asyncHandler(async (req, res) => {
   if (address !== undefined) update.address = address.trim();
   if (city !== undefined) update.city = city.trim();
   if (coverImage !== undefined) update.coverImage = coverImage;
+  if (heroImage !== undefined) update.heroImage = heroImage;
   if (gallery !== undefined) update.gallery = gallery;
   if (rules !== undefined) update.rules = rules;
   if (requirements !== undefined) update.requirements = requirements;
   if (faqs !== undefined) update.faqs = faqs;
+  if (featured !== undefined) update.featured = Boolean(featured);
 
   if (ticketTypes !== undefined) {
     update.ticketTypes = ticketTypes;
@@ -325,8 +331,8 @@ const publishEvent = asyncHandler(async (req, res) => {
     throw new ApiError(400, `A ${event.status} event cannot be published.`);
   }
 
-  if (!event.coverImage || event.ticketTypes.length === 0) {
-    throw new ApiError(400, "Add a cover image and at least one ticket type before publishing.");
+  if (!event.coverImage || !event.heroImage || event.ticketTypes.length === 0) {
+    throw new ApiError(400, "Add a cover image, hero banner image and at least one ticket type before publishing.");
   }
 
   if (new Date(event.date) < new Date()) {

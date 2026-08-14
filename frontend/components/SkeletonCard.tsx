@@ -1,8 +1,8 @@
 export function SkeletonCard() {
   return (
     <div className="overflow-hidden rounded-lg border border-ink-800 bg-ink-850">
-      <div className="skeleton aspect-[4/5]" />
-      <div className="space-y-2.5 p-3.5">
+      <div className="skeleton aspect-[3/4]" />
+      <div className="space-y-2.5 p-3">
         <div className="skeleton h-3.5 w-3/4 rounded" />
         <div className="skeleton h-3 w-1/2 rounded" />
         <div className="skeleton h-4 w-2/5 rounded" />

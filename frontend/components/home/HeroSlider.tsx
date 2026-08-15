@@ -49,7 +49,7 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
     >
       <div className="mx-auto max-w-[1248px] px-4 sm:px-6 lg:px-8">
         <div
-          className="relative w-full overflow-hidden rounded-xl bg-neutral-900"
+          className="relative w-full overflow-hidden rounded-xl bg-neutral-900 max-sm:min-h-0!"
           style={{ aspectRatio: String(activeRatio), minHeight: 220, maxHeight: "78vh" }}
         >
           {slides.map((slide, slideIndex) => {
@@ -74,19 +74,6 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
                 }}
               />
             );
-            const backdrop = (
-              <div aria-hidden className="absolute inset-0 hidden max-sm:block">
-                <EventImage
-                  src={slide.image}
-                  alt=""
-                  sizes="100vw"
-                  priority
-                  darkFallback
-                  fit="cover"
-                  imgClassName="scale-110 opacity-60 blur-2xl"
-                />
-              </div>
-            );
             return (
               <div
                 key={slideIndex}
@@ -96,7 +83,6 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
                   slideIndex === index ? "opacity-100" : "pointer-events-none opacity-0",
                 )}
               >
-                {backdrop}
                 {slide.link ? (
                   <a
                     href={slide.link}

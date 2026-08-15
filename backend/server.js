@@ -18,8 +18,8 @@ const { expirePendingBookings } = require("./services/bookingService");
 
 const app = express();
 
-// Security headers
-app.use(helmet());
+// Security headers (COOP disabled so the Google OAuth popup can postMessage back)
+app.use(helmet({ crossOriginOpenerPolicy: false }));
 
 // CORS — credentials required for httpOnly cookie auth
 const allowedOrigins = process.env.CLIENT_URL

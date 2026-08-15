@@ -110,6 +110,23 @@ const validateEventBase = (body, { partial = false } = {}) => {
     if (image && !/^https?:\/\/.+/.test(image)) return "Hero banner image must be a valid URL";
   });
 
+  if (body.heroImages !== undefined) {
+    if (!Array.isArray(body.heroImages)) {
+      errors.heroImages = "Hero images must be an array";
+    } else {
+      const heroErrors = [];
+      body.heroImages.forEach((slide, index) => {
+        const prefix = `heroImages[${index}]`;
+        const image = (slide?.image || "").trim();
+        if (!image) heroErrors.push(`${prefix}.image: Image URL is required`);
+        else if (!/^https?:\/\/.+/.test(image)) heroErrors.push(`${prefix}.image: Must be a valid URL`);
+        if (slide?.link && !/^https?:\/\/.+/.test(slide.link.trim()))
+          heroErrors.push(`${prefix}.link: Must be a valid URL`);
+      });
+      if (heroErrors.length > 0) errors.heroImages = heroErrors.join("; ");
+    }
+  }
+
   check("featured", "Featured", () => {
     if (body.featured !== undefined && typeof body.featured !== "boolean")
       return "Featured must be a boolean";

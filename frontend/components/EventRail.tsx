@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { EventListItem } from "@/types";
 import { EventCard } from "@/components/EventCard";
-import { SkeletonCard } from "@/components/SkeletonCard";
+import { Loader } from "@/components/Loader";
 
 export function EventRail({
   title,
@@ -38,12 +38,8 @@ export function EventRail({
       </div>
 
       {loading ? (
-        <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="w-[140px] shrink-0 sm:w-[230px] sm:flex-none">
-              <SkeletonCard />
-            </div>
-          ))}
+        <div className="flex h-56 items-center justify-center">
+          <Loader />
         </div>
       ) : events.length === 0 ? (
         <p className="rounded-lg border border-dashed border-ink-700 px-6 py-10 text-center text-sm text-paper-dim">
@@ -52,10 +48,10 @@ export function EventRail({
       ) : (
         <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
           {events.map((event) => (
-            <EventCard
+<EventCard
               key={event._id}
               event={event}
-              className="w-[140px] shrink-0 snap-start sm:w-[230px] sm:flex-none"
+              className="w-[140px] shrink-0 snap-start sm:w-[190px] sm:flex-none"
             />
           ))}
         </div>

@@ -5,6 +5,7 @@ import { Search, UserRoundCheck, UserRoundX } from "lucide-react";
 import { adminService } from "@/services/admin";
 import { Table, Td, Th } from "@/components/dashboard/Table";
 import { Badge } from "@/components/ui/Badge";
+import { Loader } from "@/components/Loader";
 import { getErrorMessage } from "@/lib/api";
 import { cn, formatDate } from "@/lib/utils";
 import type { AdminUser, Role } from "@/types";
@@ -103,10 +104,8 @@ export function UsersTab() {
       )}
 
       {loading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="skeleton h-14 rounded-lg" />
-          ))}
+        <div className="flex min-h-48 items-center justify-center">
+          <Loader />
         </div>
       ) : (
         <Table>

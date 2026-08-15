@@ -9,6 +9,7 @@ import { EventForm, useCategories } from "@/components/organizer/EventForm";
 import { Button } from "@/components/ui/Button";
 import { EventStatusBadge } from "@/components/dashboard/StatusBadges";
 import { EmptyState } from "@/components/ui/Section";
+import { Loader } from "@/components/Loader";
 import { getErrorMessage } from "@/lib/api";
 import { cn, formatDateTime } from "@/lib/utils";
 import type { EventDetail, EventListItem } from "@/types";
@@ -124,10 +125,8 @@ export function EventsTab() {
       )}
 
       {loading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="skeleton h-20 rounded-lg" />
-          ))}
+        <div className="flex min-h-48 items-center justify-center">
+          <Loader />
         </div>
       ) : events.length === 0 ? (
         <EmptyState

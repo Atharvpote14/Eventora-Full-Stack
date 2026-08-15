@@ -5,6 +5,19 @@ import Image from "next/image";
 import { CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const normalizeSrc = (src: string): string => {
+  try {
+    const parsed = new URL(src);
+    if (parsed.pathname.startsWith("/_next/image")) {
+      const inner = parsed.searchParams.get("url");
+      if (inner) return inner;
+    }
+  } catch {
+    // Not a URL; leave as-is.
+  }
+  return src;
+};
+
 export function EventImage({
   src,
   alt,
@@ -13,6 +26,8 @@ export function EventImage({
   imgClassName,
   priority,
   darkFallback,
+  fit = "cover",
+  onLoad,
 }: {
   src: string;
   alt: string;
@@ -21,10 +36,13 @@ export function EventImage({
   imgClassName?: string;
   priority?: boolean;
   darkFallback?: boolean;
+  fit?: "cover" | "contain";
+  onLoad?: (el: HTMLImageElement) => void;
 }) {
   const [failed, setFailed] = useState(false);
+  const resolved = normalizeSrc(src);
 
-  if (!src || failed) {
+  if (!resolved || failed) {
     return (
       <div
         role="img"
@@ -47,13 +65,18 @@ export function EventImage({
 
   return (
     <Image
-      src={src}
+      src={resolved}
       alt={alt}
       fill
       sizes={sizes}
       priority={priority}
       onError={() => setFailed(true)}
-      className={cn("object-cover", imgClassName, className)}
+      onLoad={(e) => onLoad?.(e.currentTarget)}
+      className={cn(
+        fit === "contain" ? "object-contain" : "object-cover",
+        imgClassName,
+        className,
+      )}
     />
   );
 }

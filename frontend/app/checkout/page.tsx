@@ -11,6 +11,7 @@ import { openRazorpay } from "@/lib/razorpay";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { EventImage } from "@/components/EventImage";
+import { Loader } from "@/components/Loader";
 import { getErrorMessage } from "@/lib/api";
 import { formatDate, formatTime, formatINR, categoryName } from "@/lib/utils";
 import type { Booking, EventDetail } from "@/types";
@@ -21,7 +22,7 @@ export default function CheckoutPage() {
       <Suspense
         fallback={
           <div className="mx-auto flex min-h-[60vh] max-w-5xl items-center justify-center px-4">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-700 border-t-ember-500" />
+            <Loader />
           </div>
         }
       >
@@ -144,10 +145,8 @@ function CheckoutContent() {
   if (loadingEvent) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="skeleton h-8 w-64 rounded" />
-        <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
-          <div className="skeleton h-64 rounded-lg" />
-          <div className="skeleton h-72 rounded-lg" />
+        <div className="flex min-h-72 items-center justify-center">
+          <Loader />
         </div>
       </div>
     );

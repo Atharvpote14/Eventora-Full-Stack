@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CircleDollarSign, Clock3, LayoutGrid, Ticket, UserRound, Users } from "lucide-react";
 import { adminService } from "@/services/admin";
 import { StatCard } from "@/components/dashboard/StatCard";
+import { Loader } from "@/components/Loader";
 import { getErrorMessage } from "@/lib/api";
 import { formatINR } from "@/lib/utils";
 
@@ -31,10 +32,8 @@ export function OverviewTab() {
 
   if (loading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="skeleton h-24 rounded-lg" />
-        ))}
+      <div className="flex min-h-48 items-center justify-center">
+        <Loader />
       </div>
     );
   }

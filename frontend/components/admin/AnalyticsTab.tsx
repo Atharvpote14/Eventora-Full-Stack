@@ -5,6 +5,7 @@ import { LayoutGrid, TrendingUp, Users } from "lucide-react";
 import { adminService } from "@/services/admin";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { HBarList } from "@/components/dashboard/HBarList";
+import { Loader } from "@/components/Loader";
 import { getErrorMessage } from "@/lib/api";
 import { formatINR } from "@/lib/utils";
 
@@ -32,13 +33,8 @@ export function AnalyticsTab() {
 
   if (loading) {
     return (
-      <div className="space-y-3">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="skeleton h-24 rounded-lg" />
-          ))}
-        </div>
-        <div className="skeleton h-48 rounded-lg" />
+      <div className="flex min-h-64 items-center justify-center">
+        <Loader />
       </div>
     );
   }

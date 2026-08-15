@@ -7,6 +7,7 @@ import { CheckCircle2, Ticket, XCircle } from "lucide-react";
 import { RequireAuth } from "@/contexts/AuthContext";
 import { bookingsService, ticketsService } from "@/services/bookings";
 import { Button } from "@/components/ui/Button";
+import { Loader } from "@/components/Loader";
 import { ReceiptPrinter } from "@/components/receipt/ReceiptPrinter";
 import { getErrorMessage } from "@/lib/api";
 import { formatDate, formatTime, formatINR } from "@/lib/utils";
@@ -18,7 +19,7 @@ export default function ConfirmationPage() {
       <Suspense
         fallback={
           <div className="mx-auto flex min-h-[60vh] max-w-2xl items-center justify-center px-4">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-700 border-t-ember-500" />
+            <Loader />
           </div>
         }
       >
@@ -67,7 +68,7 @@ function ConfirmationContent() {
   if (loading) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-24 text-center">
-        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-ink-700 border-t-ember-500" />
+        <Loader />
       </div>
     );
   }

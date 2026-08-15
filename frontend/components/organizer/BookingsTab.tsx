@@ -8,6 +8,7 @@ import {
   PaymentStatusBadge,
 } from "@/components/dashboard/StatusBadges";
 import { EmptyState } from "@/components/ui/Section";
+import { Loader } from "@/components/Loader";
 import { getErrorMessage } from "@/lib/api";
 import { cn, formatDateTime, formatINR } from "@/lib/utils";
 import type { Booking, EventListItem } from "@/types";
@@ -62,10 +63,8 @@ export function BookingsTab() {
 
   if (loading && events.length === 0 && bookings.length === 0) {
     return (
-      <div className="space-y-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="skeleton h-16 rounded-lg" />
-        ))}
+      <div className="flex min-h-48 items-center justify-center">
+        <Loader />
       </div>
     );
   }

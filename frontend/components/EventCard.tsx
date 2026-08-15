@@ -41,11 +41,11 @@ export function EventCard({
     <Link
       href={`/events/${event.slug}`}
       className={cn(
-        "group block overflow-hidden rounded-lg border border-ink-800 bg-ink-850 transition-all duration-300 hover:border-ink-600 hover:bg-ink-800",
+        "group block overflow-hidden rounded-md border border-ink-800 bg-ink-850 transition-all duration-300 hover:border-ink-600 hover:bg-ink-800",
         className,
       )}
     >
-      <div className="relative aspect-[3/4] overflow-hidden">
+      <div className="relative aspect-[2/3] overflow-hidden">
         <EventImage
           src={event.coverImage}
           alt={event.title}
@@ -69,11 +69,6 @@ export function EventCard({
             <Heart className={cn("h-3.5 w-3.5", wishlisted && "fill-current")} aria-hidden />
           </button>
         </div>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-ink-950/80 to-transparent" />
-        <p className="absolute bottom-2 left-2 flex items-center gap-1.5 text-xs font-semibold text-paper">
-          <CalendarDays className="h-3.5 w-3.5 text-ember-400" aria-hidden />
-          {formatDate(event.date)}
-        </p>
       </div>
       <div className="p-3">
         <h3 className="line-clamp-1 text-[13px] font-semibold text-paper group-hover:text-ember-300">
@@ -85,6 +80,11 @@ export function EventCard({
             {event.city}
             {event.venue ? ` · ${event.venue}` : ""}
           </span>
+        </p>
+        <p className="mt-1 flex items-center gap-1 text-xs text-paper-faint">
+          <CalendarDays className="h-3 w-3 shrink-0" aria-hidden />
+          {formatDate(event.date)}
+          {event.startTime ? ` · ${event.startTime}` : ""}
         </p>
         <div className="mt-2 flex items-center justify-between">
           <p className="text-[13px] font-bold text-paper">

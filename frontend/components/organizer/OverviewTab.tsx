@@ -15,6 +15,7 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { HBarList } from "@/components/dashboard/HBarList";
 import { Table, Td, Th } from "@/components/dashboard/Table";
 import { BookingStatusBadge } from "@/components/dashboard/StatusBadges";
+import { Loader } from "@/components/Loader";
 import { getErrorMessage } from "@/lib/api";
 import { formatDate, formatINR, timeAgo } from "@/lib/utils";
 
@@ -42,13 +43,8 @@ export function OverviewTab() {
 
   if (loading) {
     return (
-      <div className="space-y-3">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="skeleton h-24 rounded-lg" />
-          ))}
-        </div>
-        <div className="skeleton h-64 rounded-lg" />
+      <div className="flex min-h-56 items-center justify-center">
+        <Loader />
       </div>
     );
   }

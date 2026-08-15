@@ -16,6 +16,7 @@ import { useWishlist } from "@/contexts/WishlistContext";
 import { bookingsService, ticketsService } from "@/services/bookings";
 import { notificationsService, wishlistService } from "@/services/user";
 import { EventImage } from "@/components/EventImage";
+import { Loader } from "@/components/Loader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/Section";
@@ -53,7 +54,7 @@ export default function AccountPage() {
       <Suspense
         fallback={
           <div className="flex min-h-[50vh] items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-700 border-t-ember-500" />
+            <Loader />
           </div>
         }
       >
@@ -174,10 +175,8 @@ function BookingsTab() {
 
   if (loading) {
     return (
-      <div className="space-y-3">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="skeleton h-28 rounded-lg" />
-        ))}
+      <div className="flex min-h-40 items-center justify-center">
+        <Loader />
       </div>
     );
   }
@@ -282,10 +281,8 @@ function TicketsTab() {
 
   if (loading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <div key={index} className="skeleton h-40 rounded-lg" />
-        ))}
+      <div className="flex min-h-40 items-center justify-center">
+        <Loader />
       </div>
     );
   }
@@ -369,10 +366,8 @@ function WishlistTab() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="skeleton aspect-[4/5] rounded-lg" />
-        ))}
+      <div className="flex min-h-40 items-center justify-center">
+        <Loader />
       </div>
     );
   }
@@ -464,10 +459,8 @@ function NotificationsTab() {
 
   if (loading) {
     return (
-      <div className="space-y-3">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="skeleton h-20 rounded-lg" />
-        ))}
+      <div className="flex min-h-40 items-center justify-center">
+        <Loader />
       </div>
     );
   }

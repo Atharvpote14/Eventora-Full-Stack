@@ -5,6 +5,7 @@ import { BarChart3, CircleDollarSign, Ticket } from "lucide-react";
 import { organizerService } from "@/services/organizer";
 import { AreaChart } from "@/components/dashboard/AreaChart";
 import { HBarList } from "@/components/dashboard/HBarList";
+import { Loader } from "@/components/Loader";
 import { getErrorMessage } from "@/lib/api";
 import { cn, formatINR } from "@/lib/utils";
 import type { OrganizerAnalytics } from "@/types";
@@ -65,9 +66,8 @@ export function AnalyticsTab() {
       </div>
 
       {loading && !data ? (
-        <div className="space-y-3">
-          <div className="skeleton h-56 rounded-lg" />
-          <div className="skeleton h-40 rounded-lg" />
+        <div className="flex min-h-56 items-center justify-center">
+          <Loader />
         </div>
       ) : error ? (
         <p className="text-sm text-red-600 dark:text-red-300">{error}</p>

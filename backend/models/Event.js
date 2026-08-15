@@ -100,6 +100,15 @@ const eventSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    heroImages: {
+      type: [
+        {
+          image: { type: String, default: "" },
+          link: { type: String, default: "" },
+        },
+      ],
+      default: [],
+    },
     gallery: {
       type: [String],
       default: [],

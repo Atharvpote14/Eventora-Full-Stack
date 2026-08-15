@@ -8,6 +8,7 @@ import { RequireAuth } from "@/contexts/AuthContext";
 import { ticketsService } from "@/services/bookings";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Loader } from "@/components/Loader";
 import { getErrorMessage } from "@/lib/api";
 import { formatDate, formatTime } from "@/lib/utils";
 import type { Ticket } from "@/types";
@@ -53,7 +54,7 @@ function TicketContent() {
   if (loading) {
     return (
       <div className="mx-auto max-w-xl px-4 py-24 text-center">
-        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-ink-700 border-t-ember-500" />
+        <Loader />
       </div>
     );
   }

@@ -5,6 +5,7 @@ import { adminService } from "@/services/admin";
 import { Table, Td, Th } from "@/components/dashboard/Table";
 import { PaymentStatusBadge } from "@/components/dashboard/StatusBadges";
 import { EmptyState } from "@/components/ui/Section";
+import { Loader } from "@/components/Loader";
 import { getErrorMessage } from "@/lib/api";
 import { cn, formatDateTime, formatINR } from "@/lib/utils";
 
@@ -59,10 +60,8 @@ export function PaymentsTab() {
       )}
 
       {loading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="skeleton h-14 rounded-lg" />
-          ))}
+        <div className="flex min-h-48 items-center justify-center">
+          <Loader />
         </div>
       ) : payments.length === 0 ? (
         <EmptyState title="No payments match this filter" />

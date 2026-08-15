@@ -1,6 +1,5 @@
 const Review = require("../models/Review");
 const Event = require("../models/Event");
-const Booking = require("../models/Booking");
 const ApiError = require("../utils/ApiError");
 
 const serializeReview = (review) => ({
@@ -44,20 +43,6 @@ const getRatingSummary = async (eventId) => {
 const createReview = async (userId, eventId, { rating, comment }) => {
   const event = await Event.findById(eventId);
   if (!event) throw new ApiError(404, "Event not found.");
-
-  const booking = await Booking.findOne({ event: eventId, user: userId });
-  if (!booking) {
-    throw new ApiError(
-      403,
-      "You must book this event before you can review it. Only attendees with a confirmed paid booking can review."
-    );
-  }
-  if (booking.bookingStatus !== "confirmed" || booking.paymentStatus !== "paid") {
-    throw new ApiError(
-      403,
-      `Only attendees with a confirmed paid booking can review this event. Your booking is currently ${booking.bookingStatus} (payment: ${booking.paymentStatus}).`
-    );
-  }
 
   const existing = await Review.findOne({ user: userId, event: eventId });
   if (existing) {

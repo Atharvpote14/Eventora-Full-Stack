@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { GoogleButton } from "@/components/auth/GoogleButton";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { OtpVerification } from "@/components/otp/OtpVerification";
@@ -77,7 +78,9 @@ export default function RegisterPage() {
         </p>
       )}
       {step === "form" ? (
-        <form onSubmit={(event) => void submitForm(event)} className="space-y-4" noValidate>
+        <>
+          <GoogleButton />
+          <form onSubmit={(event) => void submitForm(event)} className="space-y-4" noValidate>
           <Input
             label="Full name"
             autoComplete="name"
@@ -135,6 +138,7 @@ export default function RegisterPage() {
             Create account
           </Button>
         </form>
+        </>
       ) : (
         <OtpVerification
           onVerify={async (code) => {

@@ -12,6 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import { authService, type RegisterPayload } from "@/services/auth";
 import { userService } from "@/services/user";
+import { Loader } from "@/components/Loader";
 import type { User } from "@/types";
 
 interface AuthContextValue {
@@ -19,6 +20,7 @@ interface AuthContextValue {
   loading: boolean;
   initialized: boolean;
   login: (email: string, password: string) => Promise<void>;
+  googleLogin: (idToken: string) => Promise<{ user: User; isNew: boolean }>;
   register: (payload: RegisterPayload) => Promise<{ user: User }>;
   verifyOtp: (email: string, otp: string) => Promise<{ user: User }>;
   resendOtp: (email: string) => Promise<void>;
@@ -75,6 +77,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const googleLogin = useCallback(async (idToken: string) => {
+    const result = await authService.googleLogin(idToken);
+    setUser(result.user);
+    return result;
+  }, []);
+
   const register = useCallback(async (payload: RegisterPayload) => {
     return authService.register(payload);
   }, []);
@@ -111,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       initialized,
       login,
+      googleLogin,
       register,
       verifyOtp,
       resendOtp,
@@ -118,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       updateProfile,
       refresh,
     }),
-    [user, loading, initialized, login, register, verifyOtp, resendOtp, logout, updateProfile, refresh],
+    [user, loading, initialized, login, googleLogin, register, verifyOtp, resendOtp, logout, updateProfile, refresh],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -145,7 +154,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   if (!initialized || loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-700 border-t-ember-500" />
+        <Loader />
       </div>
     );
   }
@@ -179,7 +188,7 @@ export function RequireRole({
   if (!initialized || loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-700 border-t-ember-500" />
+        <Loader />
       </div>
     );
   }

@@ -37,10 +37,10 @@ export function WishlistButton({ eventId }: { eventId: string }) {
       aria-pressed={wishlisted}
       aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
       className={cn(
-        "inline-flex h-11 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors disabled:opacity-60",
+        "inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors disabled:opacity-60",
         wishlisted
           ? "border-ember-600 bg-ember-500/15 text-ember-300"
-          : "border-ink-600 text-paper-dim hover:border-ember-600 hover:text-paper",
+          : "border-white/30 text-white/80 hover:border-ember-500 hover:text-white",
       )}
     >
       <Heart className={cn("h-4 w-4", wishlisted && "fill-current")} aria-hidden />

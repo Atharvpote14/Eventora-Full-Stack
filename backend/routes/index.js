@@ -10,6 +10,7 @@ const paymentRoutes = require("./paymentRoutes");
 const ticketRoutes = require("./ticketRoutes");
 const notificationRoutes = require("./notificationRoutes");
 const adminRoutes = require("./adminRoutes");
+const heroRoutes = require("./heroRoutes");
 const wishlistRoutes = require("./wishlistRoutes");
 const reviewRoutes = require("./reviewRoutes");
 
@@ -27,5 +28,6 @@ router.use("/notifications", notificationRoutes);
 router.use("/admin", adminRoutes);
 router.use("/wishlist", wishlistRoutes);
 router.use("/reviews", reviewRoutes);
+router.use("/hero", heroRoutes);
 
 module.exports = router;

@@ -45,6 +45,15 @@ export const authService = {
     return res.data;
   },
 
+  async googleLogin(idToken: string): Promise<{ user: User; isNew: boolean }> {
+    const res = await request<{ user: User; isNew: boolean }>({
+      method: "POST",
+      url: "/auth/google",
+      data: { idToken },
+    });
+    return res.data;
+  },
+
   async logout(): Promise<void> {
     await request<null>({ method: "POST", url: "/auth/logout" });
   },

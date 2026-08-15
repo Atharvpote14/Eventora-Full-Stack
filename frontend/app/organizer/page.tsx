@@ -3,16 +3,18 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { BarChart3, CalendarCheck, LayoutDashboard, ListOrdered, ScanLine } from "lucide-react";
+import { BarChart3, CalendarCheck, Images, LayoutDashboard, ListOrdered, ScanLine } from "lucide-react";
 import { RequireRole } from "@/contexts/AuthContext";
 import { OverviewTab } from "@/components/organizer/OverviewTab";
 import { EventsTab } from "@/components/organizer/EventsTab";
 import { BookingsTab } from "@/components/organizer/BookingsTab";
 import { AnalyticsTab } from "@/components/organizer/AnalyticsTab";
 import { CheckInTab } from "@/components/organizer/CheckInTab";
+import { HeroTab } from "@/components/organizer/HeroTab";
+import { Loader } from "@/components/Loader";
 import { cn } from "@/lib/utils";
 
-type Tab = "overview" | "events" | "bookings" | "analytics" | "checkin";
+type Tab = "overview" | "events" | "bookings" | "analytics" | "checkin" | "hero";
 
 const TABS: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -20,6 +22,7 @@ const TABS: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "bookings", label: "Bookings", icon: ListOrdered },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "checkin", label: "Check-in", icon: ScanLine },
+  { id: "hero", label: "Hero", icon: Images },
 ];
 
 export default function OrganizerPage() {
@@ -28,7 +31,7 @@ export default function OrganizerPage() {
       <Suspense
         fallback={
           <div className="flex min-h-[50vh] items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-700 border-t-ember-500" />
+            <Loader />
           </div>
         }
       >
@@ -45,7 +48,7 @@ function OrganizerContent() {
     requestedTab && TABS.some((t) => t.id === requestedTab) ? requestedTab : "overview";
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-[1248px] px-4 py-10 sm:px-6 lg:px-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-paper">
@@ -91,6 +94,7 @@ function OrganizerContent() {
         {tab === "bookings" && <BookingsTab />}
         {tab === "analytics" && <AnalyticsTab />}
         {tab === "checkin" && <CheckInTab />}
+        {tab === "hero" && <HeroTab />}
       </div>
     </div>
   );

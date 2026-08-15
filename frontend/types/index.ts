@@ -38,13 +38,27 @@ export interface EventListItem {
   slug: string;
   description: string;
   category: string | { _id: string; name: string; slug: string } | null;
-  eventType: "physical" | "online" | "hybrid";
+  eventType:
+    | "physical"
+    | "online"
+    | "hybrid"
+    | "conference"
+    | "workshop"
+    | "concert"
+    | "sports"
+    | "gaming"
+    | "education"
+    | "business"
+    | "entertainment"
+    | "festival"
+    | "other";
   city: string;
   venue: string;
   date: string;
   startTime: string;
   coverImage: string;
   heroImage?: string;
+  heroImages?: { image: string; link?: string }[];
   minPrice: number;
   maxPrice: number;
   status: string;
@@ -52,11 +66,10 @@ export interface EventListItem {
 
 export interface RatingSummary {
   averageRating: number;
-  reviewCount: number;
-}
+  reviewCount: number;}
 
 export interface EventDetail extends EventListItem {
-  organizer: string;
+  organizer: string | { _id: string; name: string; email: string } | null;
   address?: string;
   endTime?: string;
   registrationDeadline?: string;
@@ -82,6 +95,14 @@ export interface Pagination {
   limit: number;
   total: number;
   pages: number;
+}
+
+export interface HeroSlide {
+  _id: string;
+  image: string;
+  link?: string;
+  isActive: boolean;
+  createdAt: string;
 }
 
 export interface BookingEventLite {
@@ -343,6 +364,7 @@ export interface EventPayload {
   ticketTypes: { name: string; price: number; capacity: number; description?: string }[];
   coverImage?: string;
   heroImage?: string;
+  heroImages?: { image: string; link?: string }[];
   featured?: boolean;
   gallery?: string[];
   rules?: string[];

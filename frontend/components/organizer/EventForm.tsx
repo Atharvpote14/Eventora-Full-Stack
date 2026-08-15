@@ -45,7 +45,7 @@ export function EventForm({
   const [category, setCategory] = useState(
     typeof event?.category === "string" ? event.category : event?.category?._id ?? "",
   );
-  const [eventType, setEventType] = useState(event?.eventType ?? "concert");
+  const [eventType, setEventType] = useState<string>(event?.eventType ?? "concert");
   const [date, setDate] = useState(event?.date ? event.date.slice(0, 10) : "");
   const [startTime, setStartTime] = useState(event?.startTime ?? "");
   const [endTime, setEndTime] = useState(event?.endTime ?? "");
@@ -56,7 +56,9 @@ export function EventForm({
   const [address, setAddress] = useState(event?.address ?? "");
   const [city, setCity] = useState(event?.city ?? "");
   const [coverImage, setCoverImage] = useState(event?.coverImage ?? "");
-  const [heroImage, setHeroImage] = useState(event?.heroImage ?? "");
+  const [heroImage, setHeroImage] = useState(
+    event?.heroImage ?? event?.heroImages?.[0]?.image ?? "",
+  );
   const [featured, setFeatured] = useState(event?.featured ?? false);
   const [rulesText, setRulesText] = useState((event?.rules ?? []).join("\n"));
   const [requirementsText, setRequirementsText] = useState(
@@ -291,7 +293,7 @@ export function EventForm({
             label="Hero banner image URL"
             value={heroImage}
             onChange={(e) => setHeroImage(e.target.value)}
-            helper="Used for the big home page hero slider. Can be a different image from the cover. Required before publishing."
+            helper="Optional. For the home page hero slider, manage multiple hero images in your dashboard Hero section."
           />
 
           <label className="flex cursor-pointer items-start gap-3 rounded-md border border-ink-700 bg-ink-900 p-3.5">

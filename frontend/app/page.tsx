@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { eventsService, categoriesService } from "@/services/events";
+import { heroService } from "@/services/hero";
 import { EventRail } from "@/components/EventRail";
 import { HeroSlider } from "@/components/home/HeroSlider";
 
@@ -12,7 +13,8 @@ export const metadata = {
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [featured, popular, upcoming, categories, free] = await Promise.all([
+  const [heroSlides, featured, popular, upcoming, categories, free] = await Promise.all([
+    heroService.slides().catch(() => []),
     eventsService.featured(10).catch(() => []),
     eventsService.popular(10).catch(() => []),
     eventsService.upcoming(10).catch(() => []),
@@ -23,19 +25,26 @@ export default async function HomePage() {
       .catch(() => []),
   ]);
 
-  const hero = featured[0];
+  const slides =
+    heroSlides.length > 0
+      ? heroSlides.map((slide) => ({ image: slide.image, link: slide.link }))
+      : featured.flatMap((event) =>
+          event.heroImages && event.heroImages.length > 0
+            ? event.heroImages.map((s) => ({ image: s.image, link: s.link }))
+            : [{ image: event.heroImage || event.coverImage, link: "" }],
+        );
 
   return (
     <div className="fade-up">
-      {hero ? (
-        <HeroSlider events={featured} />
+      {slides.length > 0 ? (
+        <HeroSlider slides={slides} />
       ) : (
         <section className="flex h-[240px] items-center justify-center">
-          <p className="text-sm text-paper-dim">No featured events right now.</p>
+          <p className="text-sm text-paper-dim">No hero images yet.</p>
         </section>
       )}
 
-      <div className="mx-auto max-w-7xl space-y-10 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1248px] space-y-10 px-4 py-8 sm:px-6 lg:px-8">
         <EventRail
           title="Trending now"
           subtitle="The experiences everyone is talking about"

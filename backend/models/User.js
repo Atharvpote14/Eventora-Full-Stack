@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "organizer", "admin"],
       default: "user",
     },
+    googleId: { type: String, default: "" },
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     profileImage: { type: String, default: "" },

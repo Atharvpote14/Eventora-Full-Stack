@@ -2,6 +2,8 @@ const User = require("../models/User");
 const ApiError = require("../utils/ApiError");
 const { successResponse } = require("../utils/apiResponse");
 const asyncHandler = require("../utils/asyncHandler");
+const { randomBytes } = require("crypto");
+const { OAuth2Client } = require("google-auth-library");
 const {
   generateToken,
   setAuthCookie,
@@ -10,6 +12,8 @@ const {
 const { createOtp, verifyOtp } = require("../services/otpService");
 const { sendOtpEmail } = require("../services/emailService");
 const { sanitizeUser } = require("../services/userService");
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const PURPOSE = {
   REGISTRATION: "registration",
@@ -95,6 +99,69 @@ const login = asyncHandler(async (req, res) => {
   });
 });
 
+const googleAuth = asyncHandler(async (req, res) => {
+  const { idToken } = req.body;
+  if (!idToken || typeof idToken !== "string") {
+    throw new ApiError(400, "Google ID token is required.");
+  }
+
+  let ticket;
+  try {
+    ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+  } catch {
+    throw new ApiError(401, "Google sign-in could not be verified. Please try again.");
+  }
+  const payload = ticket.getPayload();
+  if (!payload || !payload.email || !payload.email_verified) {
+    throw new ApiError(400, "Could not verify your Google account. Please try again.");
+  }
+
+  const email = payload.email.toLowerCase();
+  let user = await User.findOne({ email });
+  let isNew = false;
+
+  if (!user) {
+    user = await User.create({
+      name: payload.name || email.split("@")[0],
+      email,
+      password: randomBytes(32).toString("hex"),
+      googleId: payload.sub,
+      profileImage: payload.picture || "",
+      isVerified: true,
+    });
+    isNew = true;
+  } else {
+    if (!user.isActive) {
+      throw new ApiError(403, "Your account has been suspended.");
+    }
+    user.isVerified = true;
+    if (!user.googleId) user.googleId = payload.sub;
+    if (!user.profileImage && payload.picture) user.profileImage = payload.picture;
+    await user.save();
+  }
+
+  if (isNew) {
+    const { notify } = require("../services/notificationService");
+    notify({
+      userId: user._id,
+      title: "Welcome to Eventora",
+      message: "Your account was created with Google. Start discovering events and booking tickets!",
+      type: "account",
+    }).catch(() => {});
+  }
+
+  const token = generateToken(user._id, user.role);
+  setAuthCookie(res, token);
+
+  return successResponse(res, {
+    message: isNew ? "Account created successfully." : "Login successful",
+    data: { user: sanitizeUser(user), isNew },
+  });
+});
+
 const logout = asyncHandler(async (req, res) => {
   clearAuthCookie(res);
   return successResponse(res, { message: "Logout successful" });
@@ -102,7 +169,7 @@ const logout = asyncHandler(async (req, res) => {
 
 const getMe = asyncHandler(async (req, res) => {
   return successResponse(res, {
-    data: { user: sanitizeUser(req.user) },
+    data: { user: req.user ? sanitizeUser(req.user) : null },
   });
 });
 
@@ -215,6 +282,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 module.exports = {
   register,
   login,
+  googleAuth,
   logout,
   getMe,
   verifyEmailOtp,

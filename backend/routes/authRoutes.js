@@ -4,6 +4,7 @@ const rateLimit = require("express-rate-limit");
 const {
   register,
   login,
+  googleAuth,
   logout,
   getMe,
   verifyEmailOtp,
@@ -11,7 +12,7 @@ const {
   forgotPassword,
   resetPassword,
 } = require("../controllers/authController");
-const { authenticate } = require("../middleware/authMiddleware");
+const { authenticate, optionalAuthenticate } = require("../middleware/authMiddleware");
 const validate = require("../middleware/validationMiddleware");
 const {
   validateRegister,
@@ -71,8 +72,9 @@ router.post("/register", authLimiter, validate(validateRegister), register);
 router.post("/verify-otp", otpLimiter, validate(validateOtp), verifyEmailOtp);
 router.post("/resend-otp", resendLimiter, validate(validateEmailOnly), resendOtp);
 router.post("/login", authLimiter, validate(validateLogin), login);
+router.post("/google", authLimiter, googleAuth);
 router.post("/logout", authenticate, logout);
-router.get("/me", authenticate, getMe);
+router.get("/me", optionalAuthenticate, getMe);
 router.post(
   "/forgot-password",
   passwordLimiter,

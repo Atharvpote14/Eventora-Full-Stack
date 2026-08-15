@@ -33,6 +33,10 @@ export const metadata: Metadata = {
     "tech summits",
     "Eventora",
   ],
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/favicon.ico",
+  },
   openGraph: {
     title: "Eventora — Discover events worth remembering",
     description:
@@ -45,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >

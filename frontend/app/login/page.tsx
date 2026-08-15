@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { GoogleButton } from "@/components/auth/GoogleButton";
+import { Loader } from "@/components/Loader";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { getErrorMessage } from "@/lib/api";
@@ -14,7 +16,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="mx-auto flex min-h-[70vh] max-w-md items-center justify-center px-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-700 border-t-ember-500" />
+          <Loader />
         </div>
       }
     >
@@ -58,12 +60,13 @@ function LoginContent() {
       title="Welcome back"
       subtitle="Log in to book tickets and manage your events."
     >
+      {verified && (
+        <p className="mb-4 rounded-md border border-moss-500/25 bg-moss-500/10 px-3 py-2 text-sm text-moss-500">
+          Email verified! You can now log in.
+        </p>
+      )}
+      <GoogleButton />
       <form onSubmit={(event) => void submit(event)} className="space-y-4" noValidate>
-        {verified && (
-          <p className="rounded-md border border-moss-500/25 bg-moss-500/10 px-3 py-2 text-sm text-moss-500">
-            Email verified! You can now log in.
-          </p>
-        )}
         <Input
           label="Email"
           type="email"

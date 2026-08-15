@@ -18,6 +18,7 @@ import { EventsTab } from "@/components/admin/EventsTab";
 import { BookingsTab } from "@/components/admin/BookingsTab";
 import { PaymentsTab } from "@/components/admin/PaymentsTab";
 import { AnalyticsTab } from "@/components/admin/AnalyticsTab";
+import { Loader } from "@/components/Loader";
 import { cn } from "@/lib/utils";
 
 type Tab = "overview" | "users" | "events" | "bookings" | "payments" | "analytics";
@@ -37,7 +38,7 @@ export default function AdminPage() {
       <Suspense
         fallback={
           <div className="flex min-h-[50vh] items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-700 border-t-ember-500" />
+            <Loader />
           </div>
         }
       >
@@ -54,7 +55,7 @@ function AdminContent() {
     requestedTab && TABS.some((t) => t.id === requestedTab) ? requestedTab : "overview";
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-[1248px] px-4 py-10 sm:px-6 lg:px-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-paper">Admin dashboard</h1>

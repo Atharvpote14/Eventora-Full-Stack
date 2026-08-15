@@ -6,6 +6,7 @@ import { Star, Trash2 } from "lucide-react";
 import { eventsService } from "@/services/events";
 import { reviewsService } from "@/services/user";
 import { useAuth } from "@/contexts/AuthContext";
+import { Loader } from "@/components/Loader";
 import { RatingStars } from "@/components/ui/RatingStars";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -159,10 +160,8 @@ export function EventReviews({
       )}
 
       {loading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="skeleton h-24 rounded-lg" />
-          ))}
+        <div className="flex min-h-32 items-center justify-center">
+          <Loader />
         </div>
       ) : reviews.length === 0 ? (
         <p className="rounded-lg border border-dashed border-ink-700 px-6 py-10 text-center text-sm text-paper-dim">

@@ -207,6 +207,7 @@ const createEvent = asyncHandler(async (req, res) => {
     ticketTypes,
     coverImage,
     heroImage,
+    heroImages,
     gallery,
     rules,
     requirements,
@@ -240,6 +241,13 @@ const createEvent = asyncHandler(async (req, res) => {
     capacity,
     coverImage: coverImage || "",
     heroImage: heroImage || "",
+    heroImages:
+      heroImages !== undefined
+        ? heroImages.map((slide) => ({
+            image: (slide.image || "").trim(),
+            link: (slide.link || "").trim(),
+          }))
+        : [],
     gallery: gallery || [],
     rules: rules || [],
     requirements: requirements || [],
@@ -266,7 +274,7 @@ const updateEvent = asyncHandler(async (req, res) => {
   }
 
   const update = {};
-  const { title, description, category: categoryValue, eventType, date, startTime, endTime, registrationDeadline, venue, address, city, ticketTypes, coverImage, heroImage, gallery, rules, requirements, faqs, featured } = req.body;
+  const { title, description, category: categoryValue, eventType, date, startTime, endTime, registrationDeadline, venue, address, city, ticketTypes, coverImage, heroImage, heroImages, gallery, rules, requirements, faqs, featured } = req.body;
 
   if (title !== undefined) {
     update.title = title.trim();
@@ -290,6 +298,12 @@ const updateEvent = asyncHandler(async (req, res) => {
   if (city !== undefined) update.city = city.trim();
   if (coverImage !== undefined) update.coverImage = coverImage;
   if (heroImage !== undefined) update.heroImage = heroImage;
+  if (heroImages !== undefined) {
+    update.heroImages = heroImages.map((slide) => ({
+      image: (slide.image || "").trim(),
+      link: (slide.link || "").trim(),
+    }));
+  }
   if (gallery !== undefined) update.gallery = gallery;
   if (rules !== undefined) update.rules = rules;
   if (requirements !== undefined) update.requirements = requirements;
@@ -331,8 +345,8 @@ const publishEvent = asyncHandler(async (req, res) => {
     throw new ApiError(400, `A ${event.status} event cannot be published.`);
   }
 
-  if (!event.coverImage || !event.heroImage || event.ticketTypes.length === 0) {
-    throw new ApiError(400, "Add a cover image, hero banner image and at least one ticket type before publishing.");
+    if (!event.coverImage || event.ticketTypes.length === 0) {
+    throw new ApiError(400, "Add a cover image and at least one ticket type before publishing.");
   }
 
   if (new Date(event.date) < new Date()) {

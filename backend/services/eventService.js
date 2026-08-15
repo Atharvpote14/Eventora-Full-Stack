@@ -26,6 +26,12 @@ const serializeListEvent = (event) => {
     startTime: event.startTime,
     coverImage: event.coverImage,
     heroImage: event.heroImage,
+    heroImages:
+      event.heroImages && event.heroImages.length > 0
+        ? event.heroImages.map((slide) => ({ image: slide.image, link: slide.link }))
+        : event.heroImage
+          ? [{ image: event.heroImage, link: "" }]
+          : [],
     minPrice,
     maxPrice,
     status: event.status,

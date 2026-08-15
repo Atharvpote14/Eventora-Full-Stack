@@ -9,15 +9,13 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  Moon,
   Search,
-  Sun,
   Ticket,
   User2,
   X,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTheme } from "@/contexts/ThemeContext";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { cn, initials } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -94,7 +92,6 @@ function NavLinks() {
 
 export function Navbar() {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const isAuthPage = pathname === "/login" || pathname === "/register";
@@ -198,24 +195,12 @@ export function Navbar() {
             <Search className="h-5 w-5" aria-hidden />
           </button>
 
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-paper-dim transition-colors hover:bg-ink-800 hover:text-paper"
-            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5" aria-hidden />
-            ) : (
-              <Moon className="h-5 w-5" aria-hidden />
-            )}
-          </button>
+          <ThemeToggle />
 
           {user && (
             <Link
               href="/account?tab=wishlist"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md text-paper-dim transition-colors hover:bg-ink-800 hover:text-paper"
+              className="ml-2 inline-flex h-10 w-10 items-center justify-center rounded-md text-paper-dim transition-colors hover:bg-ink-800 hover:text-paper"
               aria-label="Wishlist"
               title="Wishlist"
             >
@@ -224,7 +209,7 @@ export function Navbar() {
           )}
 
           {user ? (
-            <div className="relative" ref={userMenuRef}>
+            <div className="relative ml-2" ref={userMenuRef}>
               <button
                 type="button"
                 onClick={() => setUserMenuOpen((open) => !open)}
@@ -287,7 +272,7 @@ export function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="inline-flex h-10 items-center rounded-full bg-ember-500 px-5 text-sm font-semibold text-white transition-colors hover:bg-ember-400"
+              className="ml-2 inline-flex h-10 items-center rounded-full bg-ember-500 px-5 text-sm font-semibold text-white transition-colors hover:bg-ember-400"
             >
               Sign in
             </Link>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { BarChart3, CalendarCheck, Images, LayoutDashboard, ListOrdered, ScanLine } from "lucide-react";
 import { RequireRole } from "@/contexts/AuthContext";
+import { ADMIN_EMAILS } from "@/lib/access";
 import { OverviewTab } from "@/components/organizer/OverviewTab";
 import { EventsTab } from "@/components/organizer/EventsTab";
 import { BookingsTab } from "@/components/organizer/BookingsTab";
@@ -27,7 +28,7 @@ const TABS: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
 
 export default function OrganizerPage() {
   return (
-    <RequireRole roles={["organizer"]}>
+    <RequireRole roles={["organizer", "admin"]} emails={ADMIN_EMAILS}>
       <Suspense
         fallback={
           <div className="flex min-h-[50vh] items-center justify-center">

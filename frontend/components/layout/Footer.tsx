@@ -99,8 +99,8 @@ export function Footer() {
             © {new Date().getFullYear()} Eventora. All rights reserved.
           </p>
           <p className="text-xs text-paper-faint">
-            Payments powered by{" "}
-            <span className="text-paper-dim">Razorpay</span>
+            A project powered by{" "}
+            <span className="text-paper-dim">Eventora Pvt. Ltd.</span>
           </p>
         </div>
       </div>

@@ -168,22 +168,26 @@ export function RequireAuth({ children }: { children: ReactNode }) {
 
 export function RequireRole({
   roles,
+  emails,
   children,
 }: {
   roles: Array<User["role"]>;
+  emails?: string[];
   children: ReactNode;
 }) {
   const { user, loading, initialized } = useAuth();
   const router = useRouter();
 
+  const allowed = !!user && roles.includes(user.role) && (!emails || emails.includes(user.email));
+
   useEffect(() => {
     if (!initialized || loading) return;
     if (!user) {
       router.replace("/login");
-    } else if (!roles.includes(user.role)) {
+    } else if (!allowed) {
       router.replace("/");
     }
-  }, [initialized, loading, user, roles, router]);
+  }, [initialized, loading, user, allowed, router]);
 
   if (!initialized || loading) {
     return (
@@ -193,7 +197,7 @@ export function RequireRole({
     );
   }
 
-  if (!user || !roles.includes(user.role)) {
+  if (!allowed) {
     return null;
   }
 

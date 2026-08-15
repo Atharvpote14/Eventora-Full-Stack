@@ -12,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import { RequireRole } from "@/contexts/AuthContext";
+import { ADMIN_EMAILS } from "@/lib/access";
 import { OverviewTab } from "@/components/admin/OverviewTab";
 import { UsersTab } from "@/components/admin/UsersTab";
 import { EventsTab } from "@/components/admin/EventsTab";
@@ -34,7 +35,7 @@ const TABS: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
 
 export default function AdminPage() {
   return (
-    <RequireRole roles={["admin"]}>
+    <RequireRole roles={["admin"]} emails={ADMIN_EMAILS}>
       <Suspense
         fallback={
           <div className="flex min-h-[50vh] items-center justify-center">

@@ -49,7 +49,7 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
     >
       <div className="mx-auto max-w-[1248px] px-4 sm:px-6 lg:px-8">
         <div
-          className="relative w-full overflow-hidden rounded-xl bg-neutral-900"
+          className="relative w-full overflow-hidden rounded-xl bg-neutral-900 max-sm:aspect-[16/9]! max-sm:max-h-none!"
           style={{ aspectRatio: String(activeRatio), minHeight: 220, maxHeight: "78vh" }}
         >
           {slides.map((slide, slideIndex) => {
@@ -61,6 +61,7 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
                 priority
                 darkFallback
                 fit="contain"
+                imgClassName="max-sm:object-cover!"
                 onLoad={(el) => {
                   const { naturalWidth, naturalHeight } = el;
                   if (naturalWidth > 0 && naturalHeight > 0) {

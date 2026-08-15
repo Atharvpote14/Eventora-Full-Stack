@@ -95,7 +95,7 @@ const login = asyncHandler(async (req, res) => {
 
   return successResponse(res, {
     message: "Login successful",
-    data: { user: sanitizeUser(user) },
+    data: { user: sanitizeUser(user), token },
   });
 });
 
@@ -158,7 +158,7 @@ const googleAuth = asyncHandler(async (req, res) => {
 
   return successResponse(res, {
     message: isNew ? "Account created successfully." : "Login successful",
-    data: { user: sanitizeUser(user), isNew },
+    data: { user: sanitizeUser(user), isNew, token },
   });
 });
 
@@ -201,7 +201,13 @@ const verifyEmailOtp = asyncHandler(async (req, res) => {
     type: "account",
   }).catch(() => {});
 
-  return successResponse(res, { message: "Email verified successfully" });
+  const token = generateToken(user._id, user.role);
+  setAuthCookie(res, token);
+
+  return successResponse(res, {
+    message: "Email verified successfully",
+    data: { user: sanitizeUser(user), token },
+  });
 });
 
 const resendOtp = asyncHandler(async (req, res) => {

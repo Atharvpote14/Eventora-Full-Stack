@@ -1,4 +1,4 @@
-import { request } from "@/lib/api";
+import { request, setStoredToken } from "@/lib/api";
 import type { User } from "@/types";
 
 export interface RegisterPayload {
@@ -19,12 +19,13 @@ export const authService = {
     return res.data;
   },
 
-  async verifyOtp(email: string, otp: string): Promise<{ user: User }> {
-    const res = await request<{ user: User }>({
+  async verifyOtp(email: string, otp: string): Promise<{ user: User; token?: string }> {
+    const res = await request<{ user: User; token?: string }>({
       method: "POST",
       url: "/auth/verify-otp",
       data: { email, otp },
     });
+    if (res.data.token) setStoredToken(res.data.token);
     return res.data;
   },
 
@@ -37,25 +38,31 @@ export const authService = {
   },
 
   async login(email: string, password: string): Promise<{ user: User }> {
-    const res = await request<{ user: User }>({
+    const res = await request<{ user: User; token?: string }>({
       method: "POST",
       url: "/auth/login",
       data: { email, password },
     });
+    if (res.data.token) setStoredToken(res.data.token);
     return res.data;
   },
 
   async googleLogin(idToken: string): Promise<{ user: User; isNew: boolean }> {
-    const res = await request<{ user: User; isNew: boolean }>({
+    const res = await request<{ user: User; isNew: boolean; token?: string }>({
       method: "POST",
       url: "/auth/google",
       data: { idToken },
     });
+    if (res.data.token) setStoredToken(res.data.token);
     return res.data;
   },
 
   async logout(): Promise<void> {
-    await request<null>({ method: "POST", url: "/auth/logout" });
+    try {
+      await request<null>({ method: "POST", url: "/auth/logout" });
+    } finally {
+      setStoredToken(null);
+    }
   },
 
   async me(): Promise<{ user: User }> {

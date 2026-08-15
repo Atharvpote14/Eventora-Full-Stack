@@ -5,8 +5,16 @@ const asyncHandler = require("../utils/asyncHandler");
 
 const COOKIE_NAME = process.env.COOKIE_NAME || "eventora_token";
 
+const extractToken = (req) => {
+  const fromCookie = req.cookies[COOKIE_NAME];
+  if (fromCookie) return fromCookie;
+  const header = req.headers.authorization;
+  if (header && header.startsWith("Bearer ")) return header.slice(7);
+  return null;
+};
+
 const authenticate = asyncHandler(async (req, res, next) => {
-  const token = req.cookies[COOKIE_NAME];
+  const token = extractToken(req);
 
   if (!token) {
     throw new ApiError(401, "Authentication required.");
@@ -34,7 +42,7 @@ const authenticate = asyncHandler(async (req, res, next) => {
 });
 
 const optionalAuthenticate = asyncHandler(async (req, res, next) => {
-  const token = req.cookies[COOKIE_NAME];
+  const token = extractToken(req);
 
   if (!token) return next();
 
